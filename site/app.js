@@ -1,7 +1,7 @@
 // Renders the research Markdown files (copied into docs/ at build time) with
 // hash routing: #PRD loads docs/PRD.md.
 (function () {
-  const DOCS = ["viability-analysis", "tech-stack", "PRD", "skills", "agents", "project-memory"];
+  const DOCS = ["viability-analysis", "tech-stack", "PRD", "skills", "agents", "roadmap", "project-memory"];
   const content = document.getElementById("content");
   const nav = document.getElementById("nav");
   const menu = document.getElementById("menu");
