@@ -91,6 +91,7 @@
 - `research/tech-stack.md`: stack, cost model (~$1–8/mo at MVP, ~$33–58/mo at 1k users), MCP map, integration map.
 - `research/PRD.md`: 26 features, schema, API, NFRs, metrics.
 - `.claude/CLAUDE.md` and `.claude/rules/*`: this memory.
+- `research/skills.md`: 87 candidate Claude Code skills (S01–S87), built in waves 0–4. None are written to `.claude/skills/` yet.
 
 **In progress**
 - Nothing. The next step is PRD Appendix D, week 1:
@@ -147,7 +148,7 @@
 ```
 .claude/CLAUDE.md            ✅ this memory file
 .claude/rules/               ✅ path-scoped rules (ml-pipeline, database, api, web)
-research/                    ✅ viability-analysis.md, tech-stack.md, PRD.md (product source of truth)
+research/                    ✅ viability-analysis.md, tech-stack.md, PRD.md (product source of truth), skills.md
 apps/web/                    React SPA (src/routes, src/features/<feature>, src/components/ui (shadcn),
                              src/lib/api (generated OpenAPI client), src/lib/supabase)
 apps/api/                    FastAPI (app/main.py, app/routers/, app/services/, app/schemas/,
