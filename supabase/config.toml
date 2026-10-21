@@ -1,0 +1,45 @@
+# Supabase CLI config for local development (`supabase start`). Hand-written minimal
+# subset; any key not listed falls back to the CLI default. Docs:
+# https://supabase.com/docs/guides/local-development/cli/config
+project_id = "customeriq"
+
+[api]
+enabled = true
+port = 54321
+# `app` (helpers) and `staging` are deliberately NOT exposed through PostgREST.
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+# Match the hosted project's major version once it is created (PRD §4.1: Postgres 15+).
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/auth/callback"]
+# Access tokens live 1 hour (F-02 AC6: removed members lose access within one token lifetime).
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+enable_signup = true
+# F-01 AC1: minimum 10 characters.
+minimum_password_length = 10
+
+[auth.email]
+enable_signup = true
+# F-01 AC2: email verification required.
+enable_confirmations = true
+double_confirm_changes = true
+
+# F-01: adds org_id + org_role claims (supabase/migrations/*_identity_tenancy.sql).
+[auth.hook.custom_access_token]
+enabled = true
+uri = "pg-functions://postgres/public/custom_access_token_hook"

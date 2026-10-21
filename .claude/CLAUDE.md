@@ -85,29 +85,26 @@
   - `web.md`: the React SPA
 
 ## 3. Current state  ⟵ UPDATE THIS SECTION EVERY SESSION
-**Last updated:** 2026-10-21 (Netlify + Firecrawl)
+**Last updated:** 2026-10-21 (Sprint Zero)
 
 **Done**
-- `research/viability-analysis.md`: academic GO, commercial NO-GO as originally written.
-- `research/tech-stack.md`: stack, cost model (~$1–8/mo at MVP, ~$33–58/mo at 1k users), MCP map, integration map.
-- `research/PRD.md`: 26 features, schema, API, NFRs, metrics.
-- `.claude/CLAUDE.md` and `.claude/rules/*`: this memory.
-- `research/skills.md`: 88 candidate Claude Code skills (S01–S88, incl. S88 `web-research` via Firecrawl), built in waves 0–4. None are written to `.claude/skills/` yet.
-- `research/agents.md`: a 20-agent subagent architecture (Meta as the session agent, Orchestrator, Architect, 17 specialists including the Firecrawl-based `web-researcher`), with protocols, routing and hooks. Not yet installed in `.claude/agents/`.
-- **GitHub → Netlify pipeline:** `netlify.toml` + `scripts/build-site.sh` publish `site/`, a static viewer of the research docs, from `main`. `main` was fast-forwarded to the session branch on 2026-10-21. The one-time Netlify import (connect the GitHub repo, production branch `main`) must be done by the user in the Netlify UI.
+- Research: `research/` holds the viability analysis, tech stack, PRD, skills (88), agents (20), roadmap and the UCI data-profile method.
+- GitHub → Netlify: `netlify.toml` builds `site/` (docs viewer) from `main`. The user still has to import the repo in Netlify (production branch `main`).
+- Sprint Zero (roadmap M0), verified locally on 2026-10-21:
+  - Monorepo: pnpm (`apps/web`: Vite + React 18 + TS + Tailwind 4) and uv (`apps/api`: FastAPI; `packages/ml`: `customeriq`). Web lint, typecheck, test and build pass; ruff, mypy and pytest pass (33 tests).
+  - CI: `.github/workflows/ci.yml` (web, python, db, gitleaks).
+  - Schema v1 (`supabase/migrations/20261021020657_identity_tenancy.sql`): tenancy tables, RLS, profile trigger, access-token hook. 74 SQL assertions pass via `scripts/db/test-local.sh`. **Applied to the Supabase dev project `customeriq-dev` (ref `eddzbhytyegmsxkijsok`, eu-west-2, free)**; security advisor clean.
+  - Auth scaffolding: `apps/api/app/deps/auth.py` (JWKS verification, `require_role`), 28 tests; SPA client `apps/web/src/lib/supabase.ts`.
+  - Agent team installed: `.claude/agents/` (20), guard hooks `scripts/agent-guards/` (94 self-tests), `.claude/settings.json`, ledger, ADR-0001–0011.
 
-**In progress**
-- Waiting on the user to import the repo in Netlify and share the site URL.
-- The next build step is PRD Appendix D, week 1:
-  1. Scaffold the monorepo (pnpm + uv).
-  2. Create the Supabase project and schema v1 with RLS and pgTAP tests.
-  3. Load UCI Online Retail II.
-  4. **Measure the real data:** % of rows missing a customer ID, cancellation share, revenue concentration, and the 60-day repurchase base rate at several cutoffs.
-  5. Confirm Power BI access (Windows + Pro licence via the university?).
+**In progress / next**
+- Waiting on the user: Netlify import (to get the URL); enable asymmetric JWT signing keys and the access-token hook in the dev project's Auth settings; branch protection on `main` after CI is green.
+- UCI data profile is **blocked**: the environment's network policy denies `archive.ics.uci.edu`. The user must allow that host (environment settings → Network access) or upload the zip; then run the command in `research/data-profile-uci.md`.
+- Then roadmap M1 (data foundation).
 
 **Known issues / risks / tech debt**
-- **No application code exists yet.** The commands in §5 are planned. Replace them with the real ones once scaffolded.
-- **The UCI dataset has not been downloaded or measured.** An earlier attempt to download it was declined by the user, so ask before downloading external data. All dataset numbers in the PRD examples are placeholders.
+- M1 follow-ups: FK `organizations.active_run_id` → `pipeline_runs`; DB-backed `MembershipChecker` (≤60 s cache); register `problem_error_handler` in `main.py`; index `invitations.invited_by/accepted_by` and `memberships.invited_by` (advisor INFO).
+- **The UCI dataset has not been measured.** The user approved the download, but the network policy blocks the host. All dataset numbers in the PRD examples are placeholders.
 - **`ucimlrepo.fetch_ucirepo(id=502)` is expected to fail** because the UCI API returns `data_url: null`. Download the zip from `https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip` and read both XLSX sheets with `openpyxl`.
 - **UCI metadata claims "no missing values," which is wrong:** roughly 20–25% of rows have no Customer ID. The data is also wholesale-heavy, about 90% UK, from 2009–2011, and in GBP. State these limitations in every write-up.
 - **Supabase free tier** pauses after 7 days idle and has no backups. Move to Pro before any external user. Render free tier has cold starts, so it is for demos only.
@@ -177,11 +174,13 @@ bi/                          Power BI template (.pbit) + measures.md (DAX)
 - Migrations use `YYYYMMDDHHMMSS_short_description.sql`.
 - Tests: `test_*.py`, `*.test.ts(x)`, `*.spec.ts` (Playwright).
 
-**Planned commands** (replace these once they exist):
-- Web: `pnpm -C apps/web dev | lint | typecheck | test | build`
-- API: `uv run ruff check . && uv run mypy . && uv run pytest`
-- Database: `supabase start`, `supabase migration new <name>`, `supabase test db`, `supabase gen types typescript --local`
-- Contract: `pnpm gen:api` (regenerates the TS client from `openapi.json`; CI fails on any diff)
+**Commands** (all verified 2026-10-21):
+- Setup: `pnpm install && uv sync --all-packages`
+- Web: `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` (root scripts delegate to `apps/web`)
+- Python: `uv run ruff check . && uv run ruff format --check . && uv run mypy && uv run pytest`
+- Database: `DATABASE_URL=postgresql://postgres@localhost:<port>/postgres bash scripts/db/test-local.sh` (plain Postgres 16; CI uses a `postgres:16` service)
+- Agents: `python3 scripts/agent-guards/extract-agents.py --check`, `bash scripts/agent-guards/test.sh`
+- Contract (planned, M2): `pnpm gen:api`
 
 ## 6. External dependencies
 | Service | Purpose | Docs |

@@ -1,0 +1,18 @@
+{
+  "name": "customeriq",
+  "private": true,
+  "description": "CustomerIQ monorepo: customer behavior analytics and retention intelligence.",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @customeriq/web dev",
+    "build": "pnpm --filter @customeriq/web build",
+    "lint": "pnpm --filter @customeriq/web lint",
+    "typecheck": "pnpm --filter @customeriq/web typecheck",
+    "test": "pnpm --filter @customeriq/web test --run",
+    "format": "pnpm --filter @customeriq/web format",
+    "format:check": "pnpm --filter @customeriq/web format:check"
+  }
+}

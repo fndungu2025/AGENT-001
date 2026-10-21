@@ -269,13 +269,13 @@ Status key: ✅ done · 🔄 in progress (this session) · ⏳ waiting on you ·
 **Repository setup**
 - ✅ Research docs, CLAUDE.md, path-scoped rules on `main`
 - ✅ `main` is the production branch; work happens on session or feature branches
-- 🔄 Monorepo scaffold: pnpm workspace (`apps/web`) and uv workspace (`apps/api`, `packages/ml`), with lint, format and typecheck configs
-- 🔄 `.env.example` per app (names only), `.gitignore` covering env files, build output and data
-- 🔄 Agent team installed: `.claude/agents/*.md` ×20, `scripts/agent-guards/*.sh` (tested), `.claude/settings.json` permissions, `docs/agents/ledger.md`, seed ADRs 0001–0009
+- ✅ Monorepo scaffold: pnpm workspace (`apps/web`) and uv workspace (`apps/api`, `packages/ml`), with lint, format and typecheck configs
+- ✅ `.env.example` per app (names only), `.gitignore` covering env files, build output and data
+- ✅ Agent team installed: `.claude/agents/*.md` ×20, `scripts/agent-guards/*.sh` (tested), `.claude/settings.json` permissions, `docs/agents/ledger.md`, seed ADRs 0001–0009
 - ⏳ GitHub branch protection on `main` (require CI) — **you, in GitHub settings**
 
 **CI/CD pipeline**
-- 🔄 `.github/workflows/ci.yml`:
+- ✅ `.github/workflows/ci.yml` (verified locally; first GitHub run on push):
   - web: lint, typecheck, test, build
   - api and ml: ruff, mypy, pytest
   - db: migrations applied and SQL tests run
@@ -286,23 +286,23 @@ Status key: ✅ done · 🔄 in progress (this session) · ⏳ waiting on you ·
 
 **Development environment**
 - ✅ Toolchain present here: Node 22, pnpm 10, uv, Python 3.12+, Docker, Postgres 16 client
-- 🔄 One-command setup (`pnpm install && uv sync`) documented in the README
+- ✅ One-command setup (`pnpm install && uv sync`) documented in the README
 - ⬜ SessionStart hook for cloud sessions (S07) — after the scaffold settles
 - ⬜ `.mcp.json` (S53): Supabase dev (read-only for prod), GitHub, Context7, Firecrawl — **runs only with your approval** (user-only skill)
 
 **Database provisioning**
-- 🔄 `supabase/config.toml` + migration v1 (organizations, profiles, memberships, invitations, org_settings, `app.*` helpers, RLS) + SQL tests
-- ⏳ **Supabase dev project** created (free tier) and linked — **you approve** (it creates an external resource). Until then, everything runs on local Postgres in Docker.
+- ✅ `supabase/config.toml` + migration v1 (organizations, profiles, memberships, invitations, org_settings, `app.*` helpers, RLS) + SQL tests
+- ✅ **Supabase dev project** `customeriq-dev` (eu-west-2, free) created; migration v1 applied; security advisor clean
 - ⬜ Production project (Pro, $25/mo) — at M4, not now
 
 **Authentication scaffolding**
-- 🔄 Custom access-token hook (`org_id`, `org_role` claims) in migration v1
-- 🔄 FastAPI `get_current_user` (JWKS) + `require_role()` with unit tests using locally signed tokens
-- 🔄 SPA Supabase client module + typed env
+- ✅ Custom access-token hook (`org_id`, `org_role` claims) in migration v1
+- ✅ FastAPI `get_current_user` (JWKS) + `require_role()` with unit tests using locally signed tokens
+- ✅ SPA Supabase client module + typed env
 - ⏳ Auth providers and SMTP (Resend) configured in the Supabase dashboard — **you**, when the dev project exists
 
 **Data truth** (week-1 validation from the viability analysis)
-- ⏳ **Download UCI Online Retail II** (about 45 MB from archive.ics.uci.edu). CLAUDE.md requires your approval before downloading external data.
+- ⏳ **Download UCI Online Retail II**: approved, but blocked by the environment's network policy (403 on archive.ics.uci.edu). Allow the host or upload the zip; the profiling script is ready (`notebooks/profile_uci.py`).
 - ⬜ Data profile + 60-day base rate → horizon decision
 
 ### 3.2 Decisions and actions needed from you
@@ -312,7 +312,7 @@ Status key: ✅ done · 🔄 in progress (this session) · ⏳ waiting on you ·
 | 2 | Create a Supabase **dev** project (free) and provide its project ref, or approve me creating it through the Supabase MCP | Creates an external resource | Approve the free dev project; production waits until M4 |
 | 3 | Import the repo into Netlify (production branch `main`) | Needs your Netlify login | Do it now; share the URL |
 | 4 | Turn on branch protection for `main` (require CI) | GitHub settings | After CI's first green run |
-| 5 | Set `"agent": "customeriq-meta"` as the default session agent | Changes how every future session behaves | Try it in one session first (`claude --agent customeriq-meta`), then make it the default |
+| 5 | Set `"agent": "customeriq-meta"` as the default session agent | Changes how every future session behaves | **Decided: no** (2026-10-21). Use `claude --agent customeriq-meta` when wanted |
 | 6 | Power BI access (Windows + Pro licence via the university?) | Licensing | Confirm by M4 |
 
 ---
@@ -400,3 +400,7 @@ Likelihood and impact use H/M/L.
 | Date | Workstream | Agent role(s) | Status | Evidence |
 |---|---|---|---|---|
 | 2026-10-21 | Roadmap written | architect | ✅ | this file |
+| 2026-10-21 | Monorepo scaffold + CI | devops-engineer | ✅ | web lint/typecheck/test/build pass; ruff, mypy, pytest (33) pass; actionlint, gitleaks clean |
+| 2026-10-21 | Schema v1 + auth scaffolding | db-engineer, identity-access | ✅ | 74 SQL assertions on Postgres 16; 28 auth tests; applied to Supabase dev; security advisor clean |
+| 2026-10-21 | Agent team infrastructure | meta, architect | ✅ | 20 agents extracted with no drift; guard self-tests 94/94; 4 guard defects fixed |
+| 2026-10-21 | UCI data profile | research-analyst | ⏳ blocked | network policy denies archive.ics.uci.edu; script tested on synthetic data only |

@@ -1,0 +1,29 @@
+[project]
+name = "customeriq"
+version = "0.1.0"
+description = "CustomerIQ shared analytics pipeline (parsing, cleaning, features, RFM, models)."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=3.0",
+    "numpy>=2.5",
+    "scikit-learn>=1.9",
+    "pyarrow>=26",
+    "openpyxl>=3.1",
+    "pandera>=0.34",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1",
+    "hypothesis>=6.170",
+    "ruff>=0.17",
+    "mypy>=2.4",
+]
+
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["customeriq"]

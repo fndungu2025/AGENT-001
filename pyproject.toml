@@ -1,0 +1,94 @@
+# uv workspace root (virtual: no package of its own).
+# Members: apps/api (FastAPI service, import as `app`) and packages/ml (pipeline, import as `customeriq`).
+# Setup: `uv sync --all-packages`. Checks: `uv run ruff check .`, `uv run ruff format --check .`,
+# `uv run mypy`, `uv run pytest`.
+
+[tool.uv.workspace]
+members = ["apps/api", "packages/ml"]
+
+[tool.uv.sources]
+customeriq-api = { workspace = true }
+customeriq = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "customeriq-api",
+    "customeriq",
+    "pytest>=9.1",
+    "hypothesis>=6.170",
+    "ruff>=0.17",
+    "mypy>=2.4",
+    "types-cachetools>=7.0",
+]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# scripts/agent-guards is owned by the agent-guards author and not yet ruff-clean; remove it from
+# this list once it passes `ruff check` + `ruff format --check` (scripts/** ignores below apply).
+extend-exclude = ["site", "node_modules", "apps/web", "scripts/agent-guards"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "B",     # flake8-bugbear
+    "UP",    # pyupgrade
+    "S",     # flake8-bandit (incl. S608 SQL built from strings)
+    "C4",    # flake8-comprehensions
+    "SIM",   # flake8-simplify
+    "N",     # pep8-naming
+    "PT",    # flake8-pytest-style
+    "RUF",   # ruff-specific
+    "DTZ",   # naive datetimes
+    "T20",   # print statements
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106"]  # asserts and fake credentials are fine in tests
+"scripts/**" = ["T201", "S603", "S607"]    # CLI scripts print and call git/psql
+"notebooks/**" = ["T201"]                  # analysis scripts report to stdout
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection markers are meant to be called in argument defaults.
+extend-immutable-calls = [
+    "fastapi.Depends",
+    "fastapi.Security",
+    "fastapi.Query",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Cookie",
+    "fastapi.Body",
+    "fastapi.Form",
+    "fastapi.File",
+    "app.deps.auth.require_role",  # returns a dependency for Depends(require_role("analyst"))
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "customeriq"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ---------------------------------------------------------------- mypy
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["apps/api/app", "packages/ml/customeriq"]
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["apps/api/tests", "packages/ml/tests"]
+addopts = ["--import-mode=importlib", "-ra", "--strict-markers", "--strict-config"]
+xfail_strict = true

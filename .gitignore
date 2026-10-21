@@ -1,3 +1,41 @@
 site/docs/
 site/vendor/
 site/node_modules/
+
+# --- Node / web
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.vite/
+.eslintcache
+
+# --- Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+*.egg-info/
+build/
+
+# --- Environment files (never commit; .env.example files are tracked)
+.env
+.env.*
+!.env.example
+
+# --- Data and model artifacts (never commit customer or UCI data)
+/data/
+*.xlsx
+*.parquet
+*.joblib
+*.pkl
+/models/
+
+# --- Editors / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
