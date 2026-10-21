@@ -181,8 +181,8 @@ Prompts are guidance. The documentation says rules that must always hold belong 
 
 | Guard | Mechanism | Applies to |
 |---|---|---|
-| Write-path allowlist | Agent frontmatter `hooks.PreToolUse` on `Edit\|Write\|NotebookEdit` → `scripts/agent-guards/allow-paths.sh "<glob> <glob>…"` (exit 2 if the file is outside the globs) | Every agent (globs per the roster's "Writes" column) |
-| Read-only SQL | `hooks.PreToolUse` matcher `mcp__supabase-dev__execute_sql` → `scripts/agent-guards/readonly-sql.sh` (blocks INSERT/UPDATE/DELETE/DDL) | architect, security-reviewer, incident-responder, research-analyst, product-analyst, meta |
+| Write-path allowlist | Agent frontmatter `hooks.PreToolUse` on `Edit\|Write\|NotebookEdit` → `"$CLAUDE_PROJECT_DIR"/scripts/agent-guards/allow-paths.sh "<glob> <glob>…"` (exit 2 if the file is outside the globs) | Every agent (globs per the roster's "Writes" column) |
+| Read-only SQL | `hooks.PreToolUse` matcher `mcp__.*[Ss]upabase.*__execute_sql` (covers the planned `supabase-dev` server and this environment's `Supabase` connector) → `scripts/agent-guards/readonly-sql.sh` (blocks INSERT/UPDATE/DELETE/DDL) | architect, security-reviewer, incident-responder, research-analyst, product-analyst, meta |
 | No production targets | Project `permissions.deny`: `Bash(supabase db push*)`, `Bash(supabase db reset --linked*)`, `Bash(git push --force*)`, `Bash(git push*origin main*)`, `Read(**/.env)`, `Read(**/.env.*)` (with `!**/.env.example` allowed); `supabase-prod-ro` MCP configured `read_only=true` | Everyone, including subagents |
 | Secrets in commits | Project `PreToolUse` hook on `Bash(git commit*)` → Gitleaks on staged files | Meta (the only committer) |
 | Verify before commit | The project skill `verify` (S02) is auto-run before commits. A `SubagentStop` hook in settings appends `verify` output for builder agents (optional) | Builders |
@@ -253,14 +253,14 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh '.claude/CLAUDE.md docs/agents/** research/**'"
-    - matcher: "mcp__supabase-dev__execute_sql"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh '.claude/CLAUDE.md docs/agents/** docs/adr/** research/**'"
+    - matcher: "mcp__.*[Ss]upabase.*__execute_sql"
       hooks:
         - type: command
-          command: "scripts/agent-guards/readonly-sql.sh"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/readonly-sql.sh"
 ---
 
 # Role
@@ -383,10 +383,10 @@ mcpServers:
   - github
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'docs/agents/ledger.md docs/agents/plans/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'docs/agents/ledger.md docs/agents/plans/**'"
 ---
 
 # Role
@@ -520,14 +520,14 @@ mcpServers:
   - supabase-dev
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'docs/adr/** docs/architecture/** docs/reviews/architecture-*.md'"
-    - matcher: "mcp__supabase-dev__execute_sql"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'docs/adr/** docs/architecture/** docs/reviews/architecture-*.md'"
+    - matcher: "mcp__.*[Ss]upabase.*__execute_sql"
       hooks:
         - type: command
-          command: "scripts/agent-guards/readonly-sql.sh"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/readonly-sql.sh"
 ---
 
 # Role
@@ -657,10 +657,10 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'supabase/** sql/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'supabase/** sql/**'"
 ---
 
 # Role
@@ -777,10 +777,10 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'supabase/** apps/api/app/deps/** apps/api/app/routers/orgs* apps/api/app/routers/me* apps/api/app/routers/invitations* apps/api/app/services/orgs* apps/api/app/services/members* apps/api/app/services/invitations* apps/api/app/services/deletion* apps/api/tests/** apps/web/src/features/auth/** apps/web/src/features/orgs/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'supabase/** apps/api/app/deps/** apps/api/app/routers/orgs* apps/api/app/routers/me* apps/api/app/routers/invitations* apps/api/app/services/orgs* apps/api/app/services/members* apps/api/app/services/invitations* apps/api/app/services/deletion* apps/api/tests/** apps/web/src/features/auth/** apps/web/src/features/orgs/**'"
 ---
 
 # Role
@@ -895,10 +895,10 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'packages/ml/customeriq/parsing.py packages/ml/customeriq/cleaning.py packages/ml/customeriq/features.py packages/ml/customeriq/artifacts.py packages/ml/customeriq/io/** packages/ml/tests/** apps/api/app/worker/** research/data-profile-*.md'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'packages/ml/customeriq/parsing.py packages/ml/customeriq/cleaning.py packages/ml/customeriq/features.py packages/ml/customeriq/artifacts.py packages/ml/customeriq/io/** packages/ml/tests/** apps/api/app/worker/** research/data-profile-*.md'"
 ---
 
 # Role
@@ -1008,10 +1008,10 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'packages/ml/customeriq/rfm.py packages/ml/customeriq/clustering.py packages/ml/customeriq/models.py packages/ml/customeriq/evaluation.py packages/ml/customeriq/explain.py packages/ml/customeriq/bgnbd.py packages/ml/customeriq/simulation.py packages/ml/customeriq/matching.py packages/ml/tests/** sql/rfm_reference.sql notebooks/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'packages/ml/customeriq/rfm.py packages/ml/customeriq/clustering.py packages/ml/customeriq/models.py packages/ml/customeriq/evaluation.py packages/ml/customeriq/explain.py packages/ml/customeriq/bgnbd.py packages/ml/customeriq/simulation.py packages/ml/customeriq/matching.py packages/ml/tests/** sql/rfm_reference.sql notebooks/**'"
 ---
 
 # Role
@@ -1113,10 +1113,10 @@ skills:
   - python-tests
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'packages/ml/tests/** docs/reviews/ml-*.md'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'packages/ml/tests/** docs/reviews/ml-*.md'"
 ---
 
 # Role
@@ -1225,10 +1225,10 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'apps/api/app/routers/** apps/api/app/schemas/** apps/api/app/services/** apps/api/app/repositories/** apps/api/app/errors.py apps/api/app/main.py apps/api/app/limits.py apps/api/tests/** apps/web/src/lib/api/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'apps/api/app/routers/** apps/api/app/schemas/** apps/api/app/services/** apps/api/app/repositories/** apps/api/app/errors.py apps/api/app/main.py apps/api/app/limits.py apps/api/tests/** apps/web/src/lib/api/**'"
 ---
 
 # Role
@@ -1346,10 +1346,10 @@ mcpServers:
       args: ["-y", "@playwright/mcp@0.0.41"]
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'apps/web/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'apps/web/**'"
 ---
 
 # Role
@@ -1456,10 +1456,10 @@ mcpServers:
       args: ["-y", "@playwright/mcp@0.0.41"]
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'apps/web/src/copy/** docs/reviews/ux-*.md docs/screens/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'apps/web/src/copy/** docs/reviews/ux-*.md docs/screens/**'"
 ---
 
 # Role
@@ -1569,10 +1569,10 @@ mcpServers:
       args: ["-y", "@playwright/mcp@0.0.41"]
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh '**/tests/** apps/web/e2e/** apps/web/**/*.test.ts apps/web/**/*.test.tsx supabase/tests/** load/** lighthouserc.* .size-limit.* docs/reviews/qa-*.md'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh '**/tests/** apps/web/e2e/** apps/web/**/*.test.ts apps/web/**/*.test.tsx supabase/tests/** load/** lighthouserc.* .size-limit.* docs/reviews/qa-*.md'"
 ---
 
 # Role
@@ -1680,14 +1680,14 @@ mcpServers:
   - github
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'docs/reviews/security-*.md supabase/tests/** apps/api/tests/security/**'"
-    - matcher: "mcp__supabase-dev__execute_sql"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'docs/reviews/security-*.md supabase/tests/** apps/api/tests/security/**'"
+    - matcher: "mcp__.*[Ss]upabase.*__execute_sql"
       hooks:
         - type: command
-          command: "scripts/agent-guards/readonly-sql.sh"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/readonly-sql.sh"
 ---
 
 # Role
@@ -1817,10 +1817,10 @@ mcpServers:
       url: https://mcp.sentry.dev/mcp
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh '.github/** render.yaml netlify.toml apps/web/netlify.toml site/** scripts/** **/.env.example .mcp.json apps/api/app/observability.py apps/api/app/config.py apps/web/src/lib/sentry.ts renovate.json pyproject.toml package.json pnpm-workspace.yaml docs/runbooks/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh '.github/** render.yaml netlify.toml apps/web/netlify.toml site/** scripts/build-site.sh scripts/ops/** scripts/session-start.sh **/.env.example .mcp.json apps/api/app/observability.py apps/api/app/config.py apps/web/src/lib/sentry.ts renovate.json pyproject.toml package.json pnpm-workspace.yaml docs/runbooks/**'"
 ---
 
 # Role
@@ -1936,14 +1936,14 @@ mcpServers:
       url: https://mcp.render.com/mcp
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'docs/incidents/** **/tests/**'"
-    - matcher: "mcp__supabase-dev__execute_sql"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'docs/incidents/** **/tests/**'"
+    - matcher: "mcp__.*[Ss]upabase.*__execute_sql"
       hooks:
         - type: command
-          command: "scripts/agent-guards/readonly-sql.sh"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/readonly-sql.sh"
 ---
 
 # Role
@@ -2049,10 +2049,10 @@ mcpServers:
       url: https://mcp.posthog.com/mcp
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'apps/api/app/integrations/** apps/api/app/templates/** apps/api/tests/** apps/web/src/lib/analytics/** bi/** docs/analytics-events.md docs/runbooks/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'apps/api/app/integrations/** apps/api/app/templates/** apps/api/tests/** apps/web/src/lib/analytics/** bi/** docs/analytics-events.md docs/runbooks/**'"
 ---
 
 # Role
@@ -2157,14 +2157,14 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'notebooks/** docs/academic/** research/data-profile-*.md research/notes/**'"
-    - matcher: "mcp__supabase-dev__execute_sql"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'notebooks/** docs/academic/** research/data-profile-*.md research/notes/**'"
+    - matcher: "mcp__.*[Ss]upabase.*__execute_sql"
       hooks:
         - type: command
-          command: "scripts/agent-guards/readonly-sql.sh"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/readonly-sql.sh"
 ---
 
 # Role
@@ -2259,10 +2259,10 @@ skills:
   - release-notes
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'docs/api/** docs/errors/** docs/help/** docs/runbooks/** docs/adr/drafts/** CHANGELOG.md README.md'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'docs/api/** docs/errors/** docs/help/** docs/runbooks/** docs/adr/drafts/** CHANGELOG.md README.md'"
 ---
 
 # Role
@@ -2366,14 +2366,14 @@ mcpServers:
       url: https://mcp.sentry.dev/mcp
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'research/interviews/** research/metrics/**'"
-    - matcher: "mcp__supabase-dev__execute_sql"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'research/interviews/** research/metrics/**'"
+    - matcher: "mcp__.*[Ss]upabase.*__execute_sql"
       hooks:
         - type: command
-          command: "scripts/agent-guards/readonly-sql.sh"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/readonly-sql.sh"
 ---
 
 # Role
@@ -2470,10 +2470,10 @@ mcpServers:
   - context7
 hooks:
   PreToolUse:
-    - matcher: "Edit|Write"
+    - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: "scripts/agent-guards/allow-paths.sh 'research/web/**'"
+          command: "\"$CLAUDE_PROJECT_DIR\"/scripts/agent-guards/allow-paths.sh 'research/web/**'"
 ---
 
 # Role
@@ -2775,7 +2775,8 @@ Note: inline servers in `.claude/agents/` need the **folder trust** dialog to be
 
 ### Known limitations and risks
 - **Not every agent sees every user approval.** Approvals reach subagents only through the quoted text in packets. If Meta forgets to quote one, the agent escalates again. This is safe, but you may be asked twice.
-- **Hooks depend on scripts that don't exist yet** (step 3). Until they're created, write boundaries are enforced by prompts only.
+- **The path guard only covers Edit, Write and NotebookEdit.** An agent with `Bash` can still write files through the shell. Reviewers and analysts should keep Bash read-only by instruction, and the architect's drift review checks for out-of-scope changes. Removing Bash from read-mostly agents is a possible later tightening.
+- **Guard edits are reserved for Meta and you.** No specialist's allowed paths include `scripts/agent-guards/**` or `.claude/**`.
 - **Model availability:** `opus`, `sonnet` and `haiku` aliases resolve per your plan. If a model isn't available, Claude Code uses the subagent model order. Check with `/agents` after creating the files.
 - **Cost:** a full feature pipeline spawns about 6–9 subagent runs. For small fixes, Meta should delegate to a single specialist (or use one Orchestrator step) instead of the full pipeline.
 - **Human-only steps remain:** authoring the Power BI `.pbit`, screen-reader passes, production deploys and secret rotation.
