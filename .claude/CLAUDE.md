@@ -27,7 +27,8 @@
 | Backend | Python 3.12 + FastAPI (REST + OpenAPI), Pydantic v2, SQLAlchemy 2 + psycopg 3, uv |
 | ML | pandas, NumPy, scikit-learn (KMeans, LogisticRegression, RandomForest, calibration), shap, pymc-marketing (BG/NBD, P1), pandera, joblib |
 | Data | Supabase: Postgres 15+, Auth, Storage, Realtime, pg_cron, Queues |
-| Hosting | Cloudflare Pages (SPA), Render (API + background worker), GitHub Actions (CI/CD, batch ML, nightly `pg_dump` → Cloudflare R2) |
+| Hosting | **Netlify** (SPA, auto-deployed from GitHub `main`; PRs get Deploy Previews), Render (API + background worker), GitHub Actions (CI/CD, batch ML, nightly `pg_dump` → Cloudflare R2) |
+| Dev research | Firecrawl MCP (web search/scrape for docs, competitors, pricing; never used at runtime, never given customer data) |
 | Observability | Sentry (errors), PostHog (product analytics, no PII) |
 | Email | Resend (via Supabase Auth SMTP and notifications) |
 | Academic BI | Power BI Desktop reading `bi.*` views through a read-only role (F-19) |
@@ -84,18 +85,20 @@
   - `web.md`: the React SPA
 
 ## 3. Current state  ⟵ UPDATE THIS SECTION EVERY SESSION
-**Last updated:** 2026-10-21
+**Last updated:** 2026-10-21 (Netlify + Firecrawl)
 
 **Done**
 - `research/viability-analysis.md`: academic GO, commercial NO-GO as originally written.
 - `research/tech-stack.md`: stack, cost model (~$1–8/mo at MVP, ~$33–58/mo at 1k users), MCP map, integration map.
 - `research/PRD.md`: 26 features, schema, API, NFRs, metrics.
 - `.claude/CLAUDE.md` and `.claude/rules/*`: this memory.
-- `research/skills.md`: 87 candidate Claude Code skills (S01–S87), built in waves 0–4. None are written to `.claude/skills/` yet.
-- `research/agents.md`: a 19-agent subagent architecture (Meta as the session agent, Orchestrator, Architect, 16 specialists), with protocols, routing and hooks. Not yet installed in `.claude/agents/`.
+- `research/skills.md`: 88 candidate Claude Code skills (S01–S88, incl. S88 `web-research` via Firecrawl), built in waves 0–4. None are written to `.claude/skills/` yet.
+- `research/agents.md`: a 20-agent subagent architecture (Meta as the session agent, Orchestrator, Architect, 17 specialists including the Firecrawl-based `web-researcher`), with protocols, routing and hooks. Not yet installed in `.claude/agents/`.
+- **GitHub → Netlify pipeline:** `netlify.toml` + `scripts/build-site.sh` publish `site/`, a static viewer of the research docs, from `main`. `main` was fast-forwarded to the session branch on 2026-10-21. The one-time Netlify import (connect the GitHub repo, production branch `main`) must be done by the user in the Netlify UI.
 
 **In progress**
-- Nothing. The next step is PRD Appendix D, week 1:
+- Waiting on the user to import the repo in Netlify and share the site URL.
+- The next build step is PRD Appendix D, week 1:
   1. Scaffold the monorepo (pnpm + uv).
   2. Create the Supabase project and schema v1 with RLS and pgTAP tests.
   3. Load UCI Online Retail II.
@@ -120,7 +123,7 @@
 - Use the MCP servers when available:
   - **Supabase:** SQL, migrations on a *dev* project, security/performance advisors, TS type generation.
   - **GitHub:** PRs and CI logs.
-  - **Firecrawl/WebFetch:** current docs.
+  - **Firecrawl:** current docs, competitor features and pricing (via the `web-researcher` agent).
   - **Playwright:** UI checks.
 - Production database access through MCP is **read-only**.
 - After meaningful progress, update §3 of this file in the same commit.
@@ -150,6 +153,9 @@
 .claude/CLAUDE.md            ✅ this memory file
 .claude/rules/               ✅ path-scoped rules (ml-pipeline, database, api, web)
 research/                    ✅ viability-analysis.md, tech-stack.md, PRD.md (product source of truth), skills.md, agents.md
+netlify.toml                 ✅ Netlify build config (today: docs site; later: apps/web)
+scripts/build-site.sh        ✅ copies research docs + pinned viewer libs into site/
+site/                        ✅ static docs viewer (index.html, app.js, styles.css, package.json); site/docs, site/vendor are build output
 apps/web/                    React SPA (src/routes, src/features/<feature>, src/components/ui (shadcn),
                              src/lib/api (generated OpenAPI client), src/lib/supabase)
 apps/api/                    FastAPI (app/main.py, app/routers/, app/services/, app/schemas/,
@@ -182,7 +188,9 @@ bi/                          Power BI template (.pbit) + measures.md (DAX)
 |---|---|---|
 | Supabase | Postgres, Auth, Storage, Realtime, Cron, Queues, MCP | https://supabase.com/docs |
 | Render | FastAPI web service + background worker | https://render.com/docs |
-| Cloudflare Pages / R2 | SPA hosting; off-site DB backups | https://developers.cloudflare.com/pages/ · https://developers.cloudflare.com/r2/ |
+| Netlify | SPA hosting, auto-deployed from GitHub `main`; Deploy Previews per PR | https://docs.netlify.com/ |
+| Cloudflare R2 | Off-site DB backups | https://developers.cloudflare.com/r2/ |
+| Firecrawl | Dev-time web search/scrape via MCP (research, docs, competitor pricing) | https://docs.firecrawl.dev/mcp-server |
 | GitHub Actions | CI/CD, nightly batch, `pg_dump`, demo seeding | https://docs.github.com/en/actions |
 | Sentry | Error and performance monitoring (PII scrubbing on) | https://docs.sentry.io/ |
 | PostHog | Product analytics (no PII; inputs masked) | https://posthog.com/docs |
@@ -192,10 +200,11 @@ bi/                          Power BI template (.pbit) + measures.md (DAX)
 | Power BI | Academic dashboard deliverable | https://learn.microsoft.com/en-us/power-bi/ |
 | Core libraries | FastAPI · scikit-learn · pandas · React · TanStack · ECharts | https://fastapi.tiangolo.com/ · https://scikit-learn.org/stable/user_guide.html · https://pandas.pydata.org/docs/ · https://react.dev/ · https://tanstack.com/ · https://echarts.apache.org/ |
 
-**Environment variables (names only; values live in Render, Cloudflare and GitHub secrets, or in a local `.env` that is never committed):**
+**Environment variables (names only; values live in Render, Netlify and GitHub secrets, or in a local `.env` that is never committed):**
 - **Web (`apps/web`, public, `VITE_` prefix):** `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_API_BASE_URL`, `VITE_SENTRY_DSN`, `VITE_POSTHOG_KEY`, `VITE_POSTHOG_HOST`
 - **API/worker (`apps/api`, secret):** `ENVIRONMENT`, `LOG_LEVEL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (server only), `SUPABASE_JWKS_URL`, `SUPABASE_JWT_ISSUER`, `DATABASE_URL` (pooler, port 6543, transaction mode), `DATABASE_DIRECT_URL` (port 5432, for bulk `COPY`), `CORS_ALLOWED_ORIGIN_REGEX`, `SENTRY_DSN`, `RESEND_API_KEY`, `POSTHOG_API_KEY`
-- **CI (GitHub secrets):** `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `RENDER_DEPLOY_HOOK_URL`, `RENDER_API_KEY`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`
+- **CI (GitHub secrets):** `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `RENDER_DEPLOY_HOOK_URL`, `RENDER_API_KEY`, `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID` (only if CI ever deploys via the Netlify CLI; the Git integration needs none), `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`
+- **Developer tooling (local, never committed):** `FIRECRAWL_API_KEY` (Firecrawl MCP; optional while the hosted connector is used).
 - Keep a `.env.example` in each app listing these names with no values.
 
 ## 7. User avatar reminder

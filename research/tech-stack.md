@@ -3,6 +3,8 @@
 **Date:** 2026-10-21
 **Builds on:** [`viability-analysis.md`](./viability-analysis.md)
 
+> **Decision update (2026-10-21, user decision):** frontend hosting moved from Cloudflare Pages to **Netlify**, deployed from GitHub on every push to `main` (Netlify's Git integration; pull requests get Deploy Previews). Render (API + worker), Supabase and Cloudflare **R2 for backups** are unchanged. Netlify Functions can't run Python, so nothing backend moves there. **Firecrawl** is added as a development-time MCP server for web research. Sections below are updated to match.
+
 ---
 
 ## TL;DR
@@ -14,8 +16,8 @@
 | Auth | **Supabase Auth** (JWT), verified in FastAPI via JWKS, with Postgres Row-Level Security | One identity system covers the frontend, the database and the API. |
 | Database | **Supabase (managed PostgreSQL)** | Relational, SQL-native data. Matches the PostgreSQL plan from the viability analysis. Has an official MCP server. |
 | Secondary stores | Supabase Storage (uploads + model files), materialized views instead of a cache, `pg_cron` / Supabase Queues instead of Redis | No extra services at MVP. |
-| Hosting | **Cloudflare Pages** (frontend), **Render** (FastAPI), **GitHub Actions** (CI/CD + batch ML) | Free or close to it, commercial use allowed, all have MCP servers. |
-| Cost | **~$0–8/mo MVP → ~$33–51/mo at 1k users → ~$110–200/mo at 10k users** | Stays under $50 until revenue. The 10k tier assumes paying customers. |
+| Hosting | **Netlify** (frontend, auto-deployed from GitHub `main`), **Render** (FastAPI + worker), **GitHub Actions** (CI/CD + batch ML) | Push-to-deploy from GitHub; low cost; all have MCP servers. |
+| Cost | **~$1–8/mo MVP → ~$42–67/mo at 1k users → ~$170–265/mo at 10k users** | Stays under $50 at MVP and early pilot; the 1k tier reaches $50 once a dedicated worker is needed. The 10k tier assumes paying customers. |
 
 > **Reminder from the viability analysis:** commercial SaaS was a **NO-GO as written**, because Klaviyo and Shopify already ship these features. This stack is picked so the **academic/portfolio build is the first phase of the product**. If customer interviews then show demand in a niche (for example, explainable B2B reorder prediction), you scale the same stack instead of rewriting it. Don't build multi-tenant billing until that check passes.
 
@@ -33,7 +35,7 @@
 **Why Vite SPA and not Next.js:**
 - There is no SEO need. Every page sits behind login.
 - The heavy server-side work runs in Python, not Node.js. A Next.js server would be a third runtime to host and pay for.
-- A static SPA deploys free on Cloudflare Pages with commercial use allowed.
+- A static SPA deploys from GitHub to Netlify with no server to run (Netlify Free to start, Personal at $9/mo once deploys exceed the free credits).
 - If you later need a marketing site, add a separate static site (Astro or a Next.js static export).
 
 ### Key libraries mapped to features
@@ -205,7 +207,7 @@ Design rules:
 
 | Component | Platform | Why |
 |---|---|---|
-| React SPA | **Cloudflare Pages** | Free with **commercial use allowed** and unlimited static bandwidth. Vercel Hobby **forbids commercial use**, and Vercel Pro is $20/user/mo. Preview deploys per PR. |
+| React SPA | **Netlify** | Git integration with GitHub: every push to `main` deploys production, every PR gets a Deploy Preview. Credit-based pricing: Free has 300 credits/month as a hard cap (a production deploy costs 15, bandwidth 20/GB) and pauses **all** projects on the account when exceeded, so plan on **Personal ($9/mo)** once there is real traffic. Cloudflare Pages ($0) was the original choice and remains the fallback. |
 | FastAPI API (+ worker) | **Render** | Deploys straight from a Dockerfile/GitHub, has background workers and cron jobs, and costs **$7/mo Starter (512 MB)**. The free tier sleeps (about 30–60s cold starts), which is fine for demos only. Official MCP server. |
 | Database, auth, storage | **Supabase** | Free → Pro ($25/mo, includes $10 compute credit = Micro instance) |
 | Batch ML / scheduled jobs / backups | **GitHub Actions** | Free minutes (2,000/mo private, unlimited public). Runners have about 7 GB RAM, more than a $7 Render instance, which suits training on the 1M-row dataset. |
@@ -222,7 +224,7 @@ Design rules:
 ### CI/CD
 Monorepo with GitHub Actions:
 ```
-/apps/web        React SPA      → Cloudflare Pages (auto preview per PR, prod on main)
+/apps/web        React SPA      → Netlify (Deploy Preview per PR, production on main)
 /apps/api        FastAPI        → Render (auto-deploy on main after CI passes)
 /packages/ml     pipeline code  → shared by API worker + GH Actions batch jobs + notebooks
 /supabase        migrations, seed (UCI demo data), RLS tests
@@ -232,18 +234,20 @@ Monorepo with GitHub Actions:
 | Workflow | Trigger | Steps |
 |---|---|---|
 | `ci.yml` | every PR | web: `pnpm lint typecheck test build`; api: `uv run ruff check`, `mypy`, `pytest`; db: `supabase start` + apply migrations + RLS tests (pgTAP); contract: regenerate OpenAPI types and fail if there's a diff |
-| `deploy.yml` | push to `main` | `supabase db push` (migrations) → Render deploy hook → Cloudflare Pages (git integration) |
+| `deploy.yml` | push to `main` | `supabase db push` (migrations) → Render deploy hook → Netlify (Git integration builds `main` automatically) |
 | `e2e.yml` | PR (on preview URL) | Playwright smoke: log in, upload sample, see segments |
 | `nightly.yml` | cron | `pg_dump` → R2; retrain demo model; refresh materialized views |
 
-Secrets go in GitHub Actions secrets and the Render/Cloudflare env settings. Never commit them.
+Secrets go in GitHub Actions secrets and the Render/Netlify environment settings. Never commit them.
+
+**Today (before `apps/web` exists):** `netlify.toml` at the repo root builds a static viewer of the research documents (`scripts/build-site.sh` → `site/`), so the GitHub → Netlify pipeline is live from day one. When the SPA is scaffolded, `netlify.toml` switches to building `apps/web`.
 
 ### Estimated monthly costs
 In this B2B product, **"users" are analyst seats.** Cost depends mostly on **data volume per tenant** (transaction rows and pipeline runs), not seat count. The estimates assume about 5 seats per org (1k users ≈ 200 orgs, 10k users ≈ 2,000 orgs), with an average tenant of about 100k–1M transaction rows. *Prices come from published list prices and should be checked against current pricing pages before committing.*
 
 | Item | MVP / pilot | ~1k users | ~10k users |
 |---|---|---|---|
-| Cloudflare Pages | $0 | $0 | $0 (or $5 Workers Paid) |
+| Netlify | $0 Free (300 credits, ~20 deploys) | $9 Personal | ~$20 Pro |
 | Supabase | $0 Free *(pauses after 7 days idle, no backups)* | $25 Pro (Micro compute incl.) | $25 Pro + compute upgrade (Medium ≈ +$50) + disk/egress overage ≈ **$75–110** |
 | Render API | $0 free (cold starts) – $7 Starter | $7 Starter | $25 Standard |
 | Render worker (pipelines) | $0 (use GitHub Actions) | $0–25 (Standard when uploads begin) | $25–50 (1–2 Standard) |
@@ -253,11 +257,12 @@ In this B2B product, **"users" are analyst seats.** Cost depends mostly on **dat
 | Resend | $0 | $0 | $0–20 |
 | Cloudflare R2 (backups) | $0 | $0 | $0–2 |
 | Domain | ~$1 | ~$1 | ~$1 |
-| **Total** | **≈ $1–8/mo** | **≈ $33–58/mo** | **≈ $150–245/mo** |
+| Firecrawl (dev-time web research only) | $0 free tier | $0 (or a paid plan if research volume grows) | $0–paid |
+| **Total** | **≈ $1–8/mo** | **≈ $42–67/mo** | **≈ $170–265/mo** |
 
 **Staying under $50/month:**
 - The MVP is well under budget.
-- At ~1k users you are at about $33/mo **unless** you need a dedicated pipeline worker. Keep heavy jobs on GitHub Actions until revenue covers the $25 Render Standard upgrade.
+- At ~1k users you are at about $42/mo (Supabase Pro + Render Starter + Netlify Personal) **unless** you need a dedicated pipeline worker. Keep heavy jobs on GitHub Actions until revenue covers the $25 Render Standard upgrade.
 - Upgrade Supabase to Pro ($25) as soon as **any external user** relies on it, because free projects pause and have no backups.
 - 10k users is past the budget, but at even $20–50/org/month, 2,000 orgs is $40k+ MRR. Infrastructure would be well under 1% of revenue.
 
@@ -269,7 +274,9 @@ In this B2B product, **"users" are analyst seats.** Cost depends mostly on **dat
 |---|---|---|---|
 | **Supabase** | Official Supabase MCP (`mcp.supabase.com`) | **Already connected in this environment** | List tables, run SQL, apply migrations, generate TypeScript types, read logs, check security/performance advisors (for example, missing RLS policies), manage preview branches, deploy Edge Functions |
 | **GitHub** | Official GitHub MCP | **Already connected** | Issues, PRs, code review, Actions run status and job logs, so Claude can fix CI failures |
-| **Cloudflare** | Official Cloudflare MCP servers (docs, bindings, builds, observability) | Available | Check Pages/Workers builds, read deploy logs, manage R2 buckets |
+| **Netlify** | Official Netlify MCP (`@netlify/mcp`) | Available | Check deploys and build logs, manage site settings and environment variables |
+| **Cloudflare** | Official Cloudflare MCP servers | Available (R2 backups only) | Manage the R2 backup bucket |
+| **Firecrawl** | Firecrawl MCP | **Already connected in this environment** | Web search and page scraping for research: current library docs, competitor features and pricing, regulations. Development-time only; never used by the product at runtime and never sent customer data |
 | **Render** | Official Render MCP (`mcp.render.com`) | Available | Create and inspect services, read deploy and runtime logs, query metrics, manage env vars |
 | **Sentry** | Official Sentry MCP | Available | Pull production stack traces into the coding session; Claude can investigate and fix them |
 | **PostHog** | Official PostHog MCP | Available | Query product analytics and feature flags (for example, "which dashboard pages do users actually open?") |
@@ -281,7 +288,7 @@ In this B2B product, **"users" are analyst seats.** Cost depends mostly on **dat
 1. **Schema work from the editor:** Claude writes a migration, applies it to a dev branch through Supabase MCP, runs the advisors to catch missing RLS or indexes, and regenerates `database.types.ts`, all in one session.
 2. **Data checks on real data:** "What's the 60-day repurchase base rate at a 2011-06-01 cutoff?" runs as SQL against the loaded UCI data. This is week-1 validation task #2 from the viability analysis, done directly.
 3. **Production feedback loop:** a Sentry error leads Claude to read the stack trace, reproduce it with Playwright, write the fix, open a PR through GitHub MCP, and watch Actions until it's green.
-4. **Deploy and debug:** Render and Cloudflare MCP give direct access to deploy logs and env-var checks without switching between dashboards.
+4. **Deploy and debug:** Render and Netlify MCP give direct access to deploy logs and env-var checks without switching between dashboards.
 5. **Cost and usage checks:** Supabase and Render usage plus PostHog analytics show when you are close to a pricing tier.
 
 Keep the MCP servers on **development and staging projects** by default. Give Claude read-only access to production (Supabase MCP supports `read_only` mode and project scoping), and never use service-role credentials in MCP config.
@@ -296,8 +303,11 @@ flowchart LR
     SPA[React SPA<br/>Vite · TanStack · ECharts]
   end
 
+  subgraph Netlify
+    CFP[Netlify<br/>static hosting from GitHub main]
+  end
+
   subgraph Cloudflare
-    CFP[Cloudflare Pages<br/>static hosting]
     R2[(R2<br/>off-site backups)]
   end
 
@@ -361,7 +371,7 @@ flowchart LR
 | 7 | **Type drift across Python and TypeScript** (Pydantic models, DB schema, TS types) | CI regenerates OpenAPI → TS types and Supabase → `database.types.ts`, and fails on any diff. |
 | 8 | **Inconsistent business logic** (revenue, cancellations, "active") across SQL, Python and Power BI | Keep one definition in `/packages/ml` + DB views. Power BI and the SPA read views only and never recompute from raw data. |
 | 9 | **Supabase free-tier pausing and Render free cold starts** make demos look broken | Upgrade Supabase to Pro and Render to Starter before any external user, or keep a GitHub Actions keep-alive ping for the academic demo. |
-| 10 | **CORS / environments:** preview deploys on random Cloudflare subdomains | Have FastAPI allow `*.customeriq.pages.dev` previews plus the production domain via regex. Keep separate Supabase projects for dev/staging and prod. |
+| 10 | **CORS / environments:** Deploy Previews on per-PR Netlify subdomains | Have FastAPI allow `deploy-preview-*--<site>.netlify.app` previews plus the production domain via regex, and add both to Supabase Auth redirect URLs. Keep separate Supabase projects for dev/staging and prod. |
 | 11 | **Timezones and currency:** UCI data is UK local time in GBP, while tenants will vary | Store `timestamptz` in UTC plus a tenant timezone setting. Store currency per dataset and do not mix currencies within a run. |
 | 12 | **PII and compliance** once real customer data arrives (GDPR/CCPA) | Store only `customer_ref` (hashed or opaque, with no names or emails) in the MVP. Add a data-processing agreement, per-tenant deletion (cascade on `org_id`) and a retention policy before onboarding real merchants. |
 
@@ -409,7 +419,9 @@ flowchart LR
   - Pricing: https://supabase.com/pricing
   - MCP: https://supabase.com/docs/guides/getting-started/mcp
 - PostgreSQL: https://www.postgresql.org/docs/current/
-- Cloudflare Pages: https://developers.cloudflare.com/pages/; R2: https://developers.cloudflare.com/r2/; MCP: https://developers.cloudflare.com/agents/model-context-protocol/
+- Netlify: https://docs.netlify.com/; Deploys from Git: https://docs.netlify.com/deploy/deploy-overview/; Monorepos: https://docs.netlify.com/build/configure-builds/monorepos/; Pricing: https://www.netlify.com/pricing/; MCP: https://github.com/netlify/netlify-mcp
+- Cloudflare R2 (backups): https://developers.cloudflare.com/r2/
+- Firecrawl: https://docs.firecrawl.dev/; MCP: https://docs.firecrawl.dev/mcp-server; Pricing: https://www.firecrawl.dev/pricing
 - Render: https://render.com/docs; Pricing: https://render.com/pricing; MCP: https://render.com/docs/mcp-server
 - GitHub Actions: https://docs.github.com/en/actions; GitHub MCP: https://github.com/github/github-mcp-server
 - Sentry: https://docs.sentry.io/; MCP: https://docs.sentry.io/product/sentry-mcp/

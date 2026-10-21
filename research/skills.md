@@ -14,7 +14,7 @@ Each entry is a candidate **Claude Code skill**: a `.claude/skills/<name>/SKILL.
 ### Key facts from the skills documentation that shaped this inventory
 | Fact (from the docs) | How it is applied here |
 |---|---|
-| A skill's body loads **only when invoked**, but its `description` is always in context. The listing budget is about 1% of the context window, and descriptions get dropped once the listing overflows. | 87 skills are identified (because "exhaustive" was asked for), but **§3 recommends building them in waves** (about 15–25 active at a time). Some are marked *fold into another skill* or *use a rule or hook instead*. |
+| A skill's body loads **only when invoked**, but its `description` is always in context. The listing budget is about 1% of the context window, and descriptions get dropped once the listing overflows. | 88 skills are identified (because "exhaustive" was asked for), but **§3 recommends building them in waves** (about 15–25 active at a time). Some are marked *fold into another skill* or *use a rule or hook instead*. |
 | `disable-model-invocation: true` means only the user can trigger the skill. The docs recommend it for anything with side effects (deploy, commit, sending messages). | Applied to deploy, secrets rotation, destructive data operations, seeding, and external downloads. These match the "never without approval" list in CLAUDE.md. |
 | `user-invocable: false` means only Claude can load it. Intended for background knowledge. | Applied to *reference* skills (API conventions, error catalog, UX copy, analytic definitions). |
 | `context: fork` (+ `agent:`) runs the skill in an isolated subagent that **doesn't see the conversation**. | Applied to self-contained, read-heavy audits (a11y, security, permission matrix, cost check, data profiling). |
@@ -127,8 +127,9 @@ Every skill lists: **Description · Input · Output · Dependencies** (libraries
 | S85 | `incident-triage` | Error handling | Moderate | P0 | 3 |
 | S86 | `customer-interview` | Product validation | Simple | P0 (validation) | 3 |
 | S87 | `success-metrics-review` | Product validation | Simple | P0 (validation) | 4 |
+| S88 | `web-research` | Research (Firecrawl) | Simple | P0 | 0 |
 
-**Totals:** 87 skills. By complexity: 37 Simple · 37 Moderate · 13 Complex. By priority: 71 P0, 9 P1, 2 P2, plus 5 marked P0 for the academic or validation track only (S36, S50, S79, S86, S87). The complex ones (S01, S24, S25, S26, S30, S32, S33, S51, S52, S60 and others) carry most of the project's risk and should be written first and reviewed most carefully.
+**Totals:** 88 skills. By complexity: 38 Simple · 37 Moderate · 13 Complex. By priority: 72 P0, 9 P1, 2 P2, plus 5 marked P0 for the academic or validation track only (S36, S50, S79, S86, S87). The complex ones (S01, S24, S25, S26, S30, S32, S33, S51, S52, S60 and others) carry most of the project's risk and should be written first and reviewed most carefully.
 
 ### Dependency graph (core path only)
 
@@ -275,7 +276,7 @@ flowchart TD
 #### S08 · `env-config`
 | | |
 |---|---|
-| **Description** | Keeps the environment variable contract consistent. It keeps the `.env.example` files, the `pydantic-settings` `Settings` class, the Vite env typings (`env.d.ts`), Render/Cloudflare/GitHub secret names, and CLAUDE.md §6 in sync. It validates that no secret has a `VITE_` prefix and that required vars fail fast at startup. |
+| **Description** | Keeps the environment variable contract consistent. It keeps the `.env.example` files, the `pydantic-settings` `Settings` class, the Vite env typings (`env.d.ts`), Render/Netlify/GitHub secret names, and CLAUDE.md §6 in sync. It validates that no secret has a `VITE_` prefix and that required vars fail fast at startup. |
 | **Input** | A new or renamed variable: name, scope (web/api/ci), whether it's secret, and its purpose. |
 | **Output** | Updated example files, settings class, typings and CLAUDE.md §6. A startup validation test. |
 | **Dependencies** | **Libraries:** pydantic-settings, Vite env. **Skills:** S03. |
@@ -853,11 +854,11 @@ flowchart TD
 #### S53 · `mcp-setup`
 | | |
 |---|---|
-| **Description** | Configures the project's MCP servers in `.mcp.json`: Supabase (**dev project, `read_only` for prod, project-scoped**), GitHub, Sentry, Render, Cloudflare, PostHog, Playwright and Context7. Documents which environment each points to and verifies connectivity. Never puts the service role in the config. |
+| **Description** | Configures the project's MCP servers in `.mcp.json`: Supabase (**dev project, `read_only` for prod, project-scoped**), GitHub, Sentry, Render, Netlify, PostHog, Playwright, Context7 and Firecrawl. Documents which environment each points to and verifies connectivity. Never puts the service role in the config. |
 | **Input** | Which servers to enable, and project refs (names only). |
 | **Output** | `.mcp.json` (no secrets; uses env-var expansion), a section in `docs/runbooks/mcp.md`, and a connectivity check. |
 | **Dependencies** | **External:** each MCP server. **Skills:** S08. |
-| **Docs** | [cc-mcp], [supabase-mcp], [gh-mcp], [sentry-mcp], [render-mcp], [cf-mcp], [posthog-mcp], [playwright-mcp], [context7] |
+| **Docs** | [cc-mcp], [supabase-mcp], [gh-mcp], [sentry-mcp], [render-mcp], [netlify-mcp], [posthog-mcp], [playwright-mcp], [context7], [firecrawl-mcp] |
 | **Complexity** | Simple |
 | **Frontmatter** | `disable-model-invocation: true` |
 | **Example invocation** | `/mcp-setup supabase sentry playwright` |
@@ -1108,11 +1109,11 @@ flowchart TD
 #### S74 · `deploy`
 | | |
 |---|---|
-| **Description** | Deploys to **staging** or **production**: preflight (CI green on SHA, migrations reviewed, backup taken for prod), `supabase db push` to the target project, Render deploy hook and status poll, Cloudflare Pages promotion, smoke tests (`/v1/health`, login, demo overview), and a documented rollback (Render previous deploy, forward-fix migration). **Production only by the user's explicit command.** |
+| **Description** | Deploys to **staging** or **production**: preflight (CI green on SHA, migrations reviewed, backup taken for prod), `supabase db push` to the target project, Render deploy hook and status poll, Netlify production deploy check (the Git integration builds `main`; rollback by publishing the previous deploy), smoke tests (`/v1/health`, login, demo overview), and a documented rollback (Render previous deploy, forward-fix migration). **Production only by the user's explicit command.** |
 | **Input** | Environment and git SHA. |
 | **Output** | A deployment log, smoke-test results, and a release note link (S82). |
-| **Dependencies** | **APIs:** Supabase CLI or MCP, Render API or MCP, Cloudflare API or MCP, GitHub. **Skills:** S73, S16, S67, S82. |
-| **Docs** | [supabase-migrations], [render-deploy-hooks], [render-mcp], [cf-pages-deploy], [cf-mcp] |
+| **Dependencies** | **APIs:** Supabase CLI or MCP, Render API or MCP, Netlify MCP or CLI, GitHub. **Skills:** S73, S16, S67, S82. |
+| **Docs** | [supabase-migrations], [render-deploy-hooks], [render-mcp], [netlify-deploys], [netlify-mcp] |
 | **Complexity** | Moderate |
 | **Frontmatter** | **`disable-model-invocation: true`** · `argument-hint: [staging\|production] [sha]` |
 | **Example invocation** | `/deploy staging`; `/deploy production 3f2a1c9` |
@@ -1120,18 +1121,18 @@ flowchart TD
 #### S75 · `hosting-config`
 | | |
 |---|---|
-| **Description** | Infrastructure-as-config: `render.yaml` Blueprint (API web service Starter, worker Standard, env var groups, health check, private networking), Cloudflare Pages `_headers` (CSP, HSTS, nosniff, referrer policy, frame-ancestors) and `_redirects` (SPA fallback), preview CORS regex, region selection (EU). |
+| **Description** | Infrastructure-as-config: `render.yaml` Blueprint (API web service Starter, worker Standard, env var groups, health check, private networking), `netlify.toml` `[[headers]]` (CSP, HSTS, nosniff, referrer policy, frame-ancestors) and `[[redirects]]` (SPA fallback), preview CORS regex, region selection (EU). |
 | **Input** | Service sizing (tech-stack cost table) and headers policy (§6.2). |
 | **Output** | `render.yaml`, `apps/web/public/_headers`, `_redirects`, and a validation checklist. |
 | **Dependencies** | **Skills:** S08, S72. |
-| **Docs** | [render-blueprint], [cf-headers], [cf-redirects], [mdn-csp] |
+| **Docs** | [render-blueprint], [netlify-toml], [netlify-spa], [mdn-csp] |
 | **Complexity** | Simple |
 | **Example invocation** | "Tighten the CSP to allow PostHog and Sentry only" |
 
 #### S76 · `secrets-rotation`
 | | |
 |---|---|
-| **Description** | Runbook-driven rotation (quarterly, or immediately on staff changes) of the Supabase service role and DB password, Resend, Sentry and PostHog keys, R2 keys, and BI role passwords. Updates Render, Cloudflare and GitHub secrets, verifies services, and revokes old keys. **The agent prepares and verifies; the user performs the steps in dashboards.** |
+| **Description** | Runbook-driven rotation (quarterly, or immediately on staff changes) of the Supabase service role and DB password, Resend, Sentry and PostHog keys, R2 keys, and BI role passwords. Updates Render, Netlify, Cloudflare (R2) and GitHub secrets, verifies services, and revokes old keys. **The agent prepares and verifies; the user performs the steps in dashboards.** |
 | **Input** | Which secret(s). |
 | **Output** | A completed rotation checklist and a verification report. |
 | **Dependencies** | **Skills:** S08, S74. |
@@ -1143,11 +1144,11 @@ flowchart TD
 #### S77 · `cost-watch`
 | | |
 |---|---|
-| **Description** | Monthly check of usage against the **$50/month budget** (tech-stack cost table): Supabase DB size, egress, MAU and compute; Render instance hours; Cloudflare; Sentry and PostHog quotas; Resend sends. Flags upcoming tier changes and suggests optimizations. |
+| **Description** | Monthly check of usage against the **$50/month budget** (tech-stack cost table): Supabase DB size, egress, MAU and compute; Render instance hours; Netlify credits; Firecrawl credits; Sentry and PostHog quotas; Resend sends. Flags upcoming tier changes and suggests optimizations. |
 | **Input** | Billing and usage via MCPs or dashboards. |
 | **Output** | A cost report with projection and recommendations. |
-| **Dependencies** | **APIs:** Supabase, Render, Cloudflare, Sentry and PostHog MCPs. **Skills:** S53. |
-| **Docs** | [supabase-pricing], [render-pricing], [cf-pages-limits] |
+| **Dependencies** | **APIs:** Supabase, Render, Netlify, Sentry and PostHog MCPs; S88 for price checks. **Skills:** S53. |
+| **Docs** | [supabase-pricing], [render-pricing], [netlify-pricing] |
 | **Complexity** | Simple |
 | **Frontmatter** | `context: fork` |
 | **Example invocation** | `/cost-watch` |
@@ -1277,6 +1278,19 @@ flowchart TD
 | **Frontmatter** | `context: fork` |
 | **Example invocation** | `/success-metrics-review month-1` |
 
+#### S88 · `web-research`
+| | |
+|---|---|
+| **Description** | Answers questions that need current external facts using **Firecrawl**: library and API docs and breaking changes, competitor features and pricing, hosting and service pricing, regulations and public datasets. Searches first, scrapes only the few most authoritative pages, and writes a short sourced brief (with dates checked) to `research/web/`. Also runs a monthly **competitor watch** (Klaviyo, Shopify, Bloomreach, Omnisend, Mailchimp) that records changes since the last brief. Fetched content is treated as untrusted data; no customer data or secrets are ever sent. |
+| **Input** | The question, the decision it feeds, and optionally named sources or competitors. |
+| **Output** | `research/web/<date>-<slug>.md`: answer (≤ 10 bullets), implications for CustomerIQ, sources with URL and date, unverified items. Competitor watch: a diff against the previous brief. |
+| **Dependencies** | **External APIs:** Firecrawl MCP (search, scrape, map; extract or research on authenticated plans). Context7 for library docs it covers. **Skills:** S77 (price checks feed cost-watch). |
+| **Docs** | [firecrawl], [firecrawl-mcp], [context7] |
+| **Complexity** | Simple |
+| **Frontmatter** | `context: fork` · `agent: web-researcher` · `argument-hint: [question]` |
+| **Example invocation** | `/web-research "Netlify Personal plan credit limits and overage behavior"`; `/web-research competitor-watch`; automatically: "what does Klaviyo charge for predictive analytics now?" |
+| **Priority** | P0 (supports validation and every pricing or dependency decision) |
+
 ---
 
 ## 4. What should NOT be a skill (use a rule or hook instead)
@@ -1299,7 +1313,7 @@ Because of the description-listing budget, build skills **just in time**, aligne
 
 | Wave | When | Skills | Notes |
 |---|---|---|---|
-| **0** | Week 1 (before app code) | S01, S02, S03, S04, S05, S06, S07, S08, S09, S10, S12, S17, S23, S53, S68, S73 (CI stub), S81 | Gets the repo, DB, tenancy tests, demo data and the **week-1 data measurements** in place |
+| **0** | Week 1 (before app code) | S01, S02, S03, S04, S05, S06, S07, S08, S09, S10, S12, S17, S23, S53, S68, S73 (CI stub), S81, S88 | Gets the repo, DB, tenancy tests, demo data and the **week-1 data measurements** in place |
 | **1** | Weeks 2–4 (pipeline) | S14, S15, S24, S25, S26, S27, S28, S29, S30, S31, S33, S34, S35, S36, S65 | The analytics core; the complex skills are concentrated here |
 | **2** | Weeks 4–6 (API + UI) | S11, S18, S19, S20, S21, S40, S41, S42, S48, S54, S55, S56, S57, S58, S59, S61, S62, S63, S66, S83, S84 | Reference skills S40/S63/S84 are `user-invocable: false` |
 | **3** | Weeks 6–8 (hardening + pilot) | S13, S16, S22, S43, S44, S45, S49, S50, S60, S64, S67, S69, S70, S72, S74, S75, S76, S77, S78, S79, S80, S82, S85, S86 | Pilot launch readiness |
@@ -1500,12 +1514,14 @@ Because of the description-listing budget, build skills **just in time**, aligne
 [render-logs]: https://render.com/docs/logging
 [render-mcp]: https://render.com/docs/mcp-server
 [render-pricing]: https://render.com/pricing
-[cf-pages-deploy]: https://developers.cloudflare.com/pages/configuration/git-integration/
-[cf-headers]: https://developers.cloudflare.com/pages/configuration/headers/
-[cf-redirects]: https://developers.cloudflare.com/pages/configuration/redirects/
-[cf-pages-limits]: https://developers.cloudflare.com/pages/platform/limits/
 [cf-r2]: https://developers.cloudflare.com/r2/
-[cf-mcp]: https://developers.cloudflare.com/agents/model-context-protocol/
+[netlify-deploys]: https://docs.netlify.com/deploy/deploy-overview/
+[netlify-toml]: https://docs.netlify.com/build/configure-builds/file-based-configuration/
+[netlify-spa]: https://docs.netlify.com/build/configure-builds/javascript-spas
+[netlify-pricing]: https://www.netlify.com/pricing/
+[netlify-mcp]: https://github.com/netlify/netlify-mcp
+[firecrawl]: https://docs.firecrawl.dev/
+[firecrawl-mcp]: https://docs.firecrawl.dev/mcp-server
 [sentry-python]: https://docs.sentry.io/platforms/python/integrations/fastapi/
 [sentry-react]: https://docs.sentry.io/platforms/javascript/guides/react/
 [sentry-scrubbing]: https://docs.sentry.io/platforms/python/data-management/sensitive-data/
@@ -1720,12 +1736,14 @@ Because of the description-listing budget, build skills **just in time**, aligne
 | `render-logs` | https://render.com/docs/logging |
 | `render-mcp` | https://render.com/docs/mcp-server |
 | `render-pricing` | https://render.com/pricing |
-| `cf-pages-deploy` | https://developers.cloudflare.com/pages/configuration/git-integration/ |
-| `cf-headers` | https://developers.cloudflare.com/pages/configuration/headers/ |
-| `cf-redirects` | https://developers.cloudflare.com/pages/configuration/redirects/ |
-| `cf-pages-limits` | https://developers.cloudflare.com/pages/platform/limits/ |
 | `cf-r2` | https://developers.cloudflare.com/r2/ |
-| `cf-mcp` | https://developers.cloudflare.com/agents/model-context-protocol/ |
+| `netlify-deploys` | https://docs.netlify.com/deploy/deploy-overview/ |
+| `netlify-toml` | https://docs.netlify.com/build/configure-builds/file-based-configuration/ |
+| `netlify-spa` | https://docs.netlify.com/build/configure-builds/javascript-spas |
+| `netlify-pricing` | https://www.netlify.com/pricing/ |
+| `netlify-mcp` | https://github.com/netlify/netlify-mcp |
+| `firecrawl` | https://docs.firecrawl.dev/ |
+| `firecrawl-mcp` | https://docs.firecrawl.dev/mcp-server |
 | `sentry-python` | https://docs.sentry.io/platforms/python/integrations/fastapi/ |
 | `sentry-react` | https://docs.sentry.io/platforms/javascript/guides/react/ |
 | `sentry-scrubbing` | https://docs.sentry.io/platforms/python/data-management/sensitive-data/ |
