@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CustomerIQ Research</title>
+  <meta name="description" content="Planning documents for CustomerIQ: viability analysis, tech stack, PRD, skills inventory and agent architecture.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="topbar">
+    <button class="menu" id="menu" aria-expanded="false" aria-controls="nav">Documents</button>
+    <a class="brand" href="#viability-analysis">CustomerIQ <span>Research</span></a>
+  </header>
+  <div class="layout">
+    <nav id="nav" class="nav" aria-label="Documents">
+      <ul>
+        <li><a href="#viability-analysis">Viability analysis</a></li>
+        <li><a href="#tech-stack">Tech stack</a></li>
+        <li><a href="#PRD">Product requirements (PRD)</a></li>
+        <li><a href="#skills">Skills inventory</a></li>
+        <li><a href="#agents">Agent architecture</a></li>
+        <li><a href="#project-memory">Project memory (CLAUDE.md)</a></li>
+      </ul>
+      <p class="note">Built from <code>main</code> on every push.</p>
+    </nav>
+    <main id="content" class="doc" tabindex="-1" aria-live="polite">
+      <p class="status">Loading…</p>
+    </main>
+  </div>
+  <script src="vendor/marked.min.js"></script>
+  <script src="vendor/purify.min.js"></script>
+  <script src="vendor/mermaid.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
