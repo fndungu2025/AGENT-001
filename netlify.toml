@@ -1,9 +1,12 @@
 # Netlify builds this repo from the `main` branch on every push.
-# Today it publishes the research docs site; when apps/web exists,
-# switch to the app build (see research/tech-stack.md, Hosting).
+# Published at /: the CustomerIQ analytics app (apps/web, runs entirely in the browser).
+# Published at /research/: the research and planning documents (site/).
 [build]
-  command = "bash scripts/build-site.sh"
-  publish = "site"
+  command = "bash scripts/build-netlify.sh"
+  publish = "netlify-dist"
+
+[build.environment]
+  NODE_VERSION = "22"
 
 [[headers]]
   for = "/*"
@@ -13,9 +16,15 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
-    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'"
+    # The app processes files locally and makes no network calls: connect-src is 'self' only.
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
 [[headers]]
-  for = "/docs/*"
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/research/docs/*"
   [headers.values]
     Cache-Control = "public, max-age=300"

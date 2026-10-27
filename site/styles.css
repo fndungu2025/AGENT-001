@@ -94,6 +94,11 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
   display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 8px;
   background: linear-gradient(135deg, var(--c-home), var(--c-agents)); color: var(--on-accent); font-size: 13px; font-weight: 800;
 }
+.back {
+  margin-left: auto; padding: 8px 14px; border-radius: 999px; font-weight: 650; font-size: 14px;
+  text-decoration: none; color: var(--on-accent); background: var(--c-home);
+}
+.back:hover { filter: brightness(1.1); }
 .menu {
   display: none; min-height: 44px; padding: 0 14px;
   border: 1px solid var(--border); border-radius: 8px;
