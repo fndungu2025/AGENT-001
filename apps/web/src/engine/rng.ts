@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Seeded pseudo-random numbers (mulberry32). Everything in the engine that needs randomness
 // uses this so results are reproducible (PRD: random_state = 42).
 

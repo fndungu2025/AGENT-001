@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Probability calibration fit on validation scores (PRD F-08 AC4): isotonic when there are
 // >= 1000 validation positives, otherwise sigmoid (Platt scaling).
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 
 export interface Calibrator {
   kind: "isotonic" | "sigmoid";

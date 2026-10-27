@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/restrict-template-expressions -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // File parsing: CSV/TSV/TXT (papaparse, UTF-8 with windows-1252 fallback) and XLSX
 // (read-excel-file, all sheets with the same header concatenated).
 import Papa from "papaparse";
@@ -115,7 +116,7 @@ async function parseXlsx(file: File): Promise<RawTable> {
   const { default: readXlsxFile } = await import("read-excel-file/browser");
   let sheets: { sheet: string; data: unknown[][] }[];
   try {
-    sheets = (await readXlsxFile(file)) as { sheet: string; data: unknown[][] }[];
+    sheets = await readXlsxFile(file);
   } catch {
     throw new ParseError(
       "This Excel file could not be read. Save it as .xlsx or CSV and try again.",

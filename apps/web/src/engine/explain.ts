@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/restrict-template-expressions -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Plain-language driver sentences (PRD A.6) and feature labels.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on fixed-size arrays */
 import type { Driver } from "./types";
 import { BASE_FEATURES, FEATURE_INDEX as F } from "./features";
 

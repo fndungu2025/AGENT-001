@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // RFM quintile scores and the eight rule-based segments (PRD F-06, A.4).
 import type { SegmentKey, SegmentSummary } from "./types";
 

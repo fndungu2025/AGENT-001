@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Per-customer, per-cutoff features (PRD A.3). Only rows/orders dated <= T influence a feature
 // block built at T; the label looks forward from T. Hot loops use typed arrays.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 import type { CleanData } from "./clean";
 
 export const BASE_FEATURES = [

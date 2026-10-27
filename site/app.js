@@ -117,7 +117,7 @@
         <div class="fact fact-blue"><span class="fact-label">Methods</span><span class="fact-value">RFM · K-means · LR · RF</span><span class="fact-note">Out-of-time validation vs. a baseline</span></div>
         <div class="fact fact-violet"><span class="fact-label">Data</span><span class="fact-value">UCI Online Retail II</span><span class="fact-note">1,067,371 transactions, 2009–2011</span></div>
         <div class="fact fact-amber"><span class="fact-label">Stack</span><span class="fact-value">React · FastAPI · Supabase</span><span class="fact-note">Hosted on Netlify &amp; Render</span></div>
-        <div class="fact fact-teal"><span class="fact-label">Status</span><span class="fact-value">Sprint Zero ✅</span><span class="fact-note">Foundations built and tested</span></div>
+        <div class="fact fact-teal"><span class="fact-label">Status</span><span class="fact-value">App live ✅</span><span class="fact-note">Browser analytics app + Sprint Zero built and tested</span></div>
       </div>
 
       <h2 class="section-title">Start here: the documents in reading order</h2>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Value parsing helpers (PRD A.1): numbers, dates, ids. Pure functions, no DOM.
 import { sha256Hex } from "./sha256";
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Deterministic SYNTHETIC demo dataset shaped like the UCI Online Retail II export: a UK gift
 // wholesaler/retailer with heterogeneous buying rhythms, churners, cancellations, guest checkouts
 // (no customer id), non-product codes, a few duplicates and zero-price rows.

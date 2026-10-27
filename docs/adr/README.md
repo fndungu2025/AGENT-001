@@ -20,3 +20,4 @@ approval (CLAUDE.md §2 "do not reverse without approval").
 
 New ADRs: next number, kebab-case filename, add a row here. Drafts by `docs-writer` go in
 `docs/adr/drafts/` and are accepted by `architect`.
+- [ADR-0012](0012-browser-edition-for-midterm.md): Ship a browser-only analytics edition first

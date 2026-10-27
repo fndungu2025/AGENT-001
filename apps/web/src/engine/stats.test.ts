@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 import { describe, expect, it } from "vitest";
 import { fitIsotonic, fitSigmoid } from "./calibrate";
 import { adjustedRandIndex, chooseK } from "./kmeans";

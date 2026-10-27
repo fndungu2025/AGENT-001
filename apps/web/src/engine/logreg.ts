@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // L2-regularised logistic regression with balanced class weights, fit by damped Newton (IRLS).
 // Objective (scikit-learn form): 0.5*||beta||^2 + C * sum_i w_i * logloss_i, intercept unpenalised.
 // The scaler (and the signed-log1p transform of skewed columns) is fit on the training rows only.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 
 export interface LogregModel {
   P: number;

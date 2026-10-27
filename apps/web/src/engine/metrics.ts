@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Evaluation metrics and curves (PRD F-09): ROC-AUC, PR-AUC (average precision), Brier,
 // log loss, thresholded precision/recall/F1/accuracy, lift and capture. Ties in scores are
 // handled as groups, so a constant score gives AUC 0.5 and no accidental ordering advantage.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 import type { ModelMetrics } from "./types";
 
 export interface RankCurve {

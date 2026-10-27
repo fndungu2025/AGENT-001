@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // K-means behavioural clustering on log1p(R, F, M), standardised (PRD F-07). Seeded.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 import { makeRng, SEED } from "./rng";
 import type { Rng } from "./rng";
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Small synchronous SHA-256 (crypto.subtle is async-only). Used to hash email-like customer
 // references in the browser so raw emails never reach the analysis result (PRD 6.2 privacy).
 

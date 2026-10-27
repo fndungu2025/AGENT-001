@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Repeat-purchase models (PRD F-08): recency baseline, logistic regression, random forest,
 // calibration on validation, selection by validation PR-AUC, final refit and scoring.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 import { fitCalibrator } from "./calibrate";
 import type { Calibrator } from "./calibrate";
 import { BASE_FEATURES, NB } from "./features";

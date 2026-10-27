@@ -2,6 +2,9 @@
 // Money values are in currency units (e.g. GBP), rounded to 2 decimals. Dates are ISO strings
 // (YYYY-MM-DD). Probabilities are 0..1. Definitions follow research/PRD.md Appendix A.
 // Add OPTIONAL fields only; report any change to the orchestrator.
+// Units (engine behaviour): fields named *Pct are 0-100 (rowsPct, missingCustomerPct, customersPct,
+// revenuePct, sizePct); revenueShareTop1pct/10pct, repeatCustomerRate, probabilities and model
+// metrics are 0-1. Cluster ids are 1-based; crosstab[segment][cluster - 1].
 
 export type CanonicalField =
   | "invoice_id"

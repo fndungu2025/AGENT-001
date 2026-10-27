@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/restrict-template-expressions -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // The analysis pipeline: clean -> features -> RFM -> clusters -> models -> scoring.
 // Pure and synchronous (no DOM), so it runs in a Web Worker and in unit tests.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 import { cleanTable } from "./clean";
 import type { CleanData } from "./clean";
 import { computeFeatures, FEATURE_INDEX as F, NB, wholesaleAt } from "./features";
@@ -20,7 +20,6 @@ import type {
   MonthlyPoint,
   Progress,
   Protocol,
-  QualityReport,
   RawTable,
   RiskBand,
   SegmentKey,
@@ -308,7 +307,7 @@ export function analyze(
         ];
       } else {
         drivers = topGroups(contrib, i, G, 3).map((g) =>
-          renderDriver(GROUP_NAMES[g]!, contrib![i * G + g]! > 0 ? "up" : "down", ctx),
+          renderDriver(GROUP_NAMES[g]!, contrib[i * G + g]! > 0 ? "up" : "down", ctx),
         );
       }
     }
@@ -452,7 +451,7 @@ export function analyze(
   report("done", 100, "Done");
   const result: AnalysisResult = {
     dataset,
-    quality: finishQuality(quality),
+    quality,
     protocol,
     customers,
     segments,
@@ -476,10 +475,6 @@ export function analyze(
   };
   if (predictionSkipped !== undefined) result.predictionSkipped = predictionSkipped;
   return result;
-}
-
-function finishQuality(q: QualityReport): QualityReport {
-  return q;
 }
 
 function emptyResult(

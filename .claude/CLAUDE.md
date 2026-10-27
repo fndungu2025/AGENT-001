@@ -85,7 +85,7 @@
   - `web.md`: the React SPA
 
 ## 3. Current state  ⟵ UPDATE THIS SECTION EVERY SESSION
-**Last updated:** 2026-10-21 (Sprint Zero)
+**Last updated:** 2026-10-27 (browser analytics app shipped)
 
 **Done**
 - Research: `research/` holds the viability analysis, tech stack, PRD, skills (88), agents (20), roadmap and the UCI data-profile method.
@@ -97,12 +97,16 @@
   - Auth scaffolding: `apps/api/app/deps/auth.py` (JWKS verification, `require_role`), 28 tests; SPA client `apps/web/src/lib/supabase.ts`.
   - Agent team installed: `.claude/agents/` (20), guard hooks `scripts/agent-guards/` (94 self-tests), `.claude/settings.json`, ledger, ADR-0001–0011.
 
+- **Browser analytics app (live at the Netlify URL, ADR-0012):** `apps/web/src/engine/` (TypeScript engine in a Web Worker: parse, clean R1-R8, RFM, K-means, baseline/logreg/random forest, calibration, protocol A.5; 59 tests) and `apps/web/src/app/` (start, column mapping, running, 6-tab dashboard, how-it-works; 29 tests). Netlify builds with `scripts/build-netlify.sh`: app at `/`, research docs at `/research/`. Verified in a real browser with Netlify's CSP: sample data, CSV upload and two-sheet XLSX upload; no console errors.
+- M1 (server-side data foundation) is partly built: migration `20261021025145_ingestion_curated.sql` (176 SQL assertions pass, not yet applied to the dev Supabase project) and the Python `parsing`/`schema`/`privacy` modules. Mapping, cleaning, quality report and worker are still to do; the TypeScript engine is currently the working implementation.
+
 **In progress / next**
-- Waiting on the user: Netlify import (to get the URL); enable asymmetric JWT signing keys and the access-token hook in the dev project's Auth settings; branch protection on `main` after CI is green.
-- UCI data profile is **blocked**: the environment's network policy denies `archive.ics.uci.edu`. The user must allow that host (environment settings → Network access) or upload the zip; then run the command in `research/data-profile-uci.md`.
-- Then roadmap M1 (data foundation).
+- Waiting on the user: Supabase dev project Auth settings (asymmetric JWT keys + access-token hook); branch protection on `main`.
+- UCI data profile is **blocked** (network policy denies `archive.ics.uci.edu`). To run it: allow the host or upload the zip, then run the command in `research/data-profile-uci.md`; the browser app can also take the UCI file directly (CSV export; XLSX works but is slow for ~1M rows).
+- Then continue roadmap M1-M4 (server-side product). Keep the TypeScript engine and `packages/ml` aligned with PRD Appendix A.
 
 **Known issues / risks / tech debt**
+- Browser engine deviations from the PRD model spec and its hashing choice are listed in ADR-0012.
 - M1 follow-ups: FK `organizations.active_run_id` → `pipeline_runs`; DB-backed `MembershipChecker` (≤60 s cache); register `problem_error_handler` in `main.py`; index `invitations.invited_by/accepted_by` and `memberships.invited_by` (advisor INFO).
 - **The UCI dataset has not been measured.** The user approved the download, but the network policy blocks the host. All dataset numbers in the PRD examples are placeholders.
 - **`ucimlrepo.fetch_ucirepo(id=502)` is expected to fail** because the UCI API returns `data_url: null`. Download the zip from `https://archive.ics.uci.edu/static/public/502/online+retail+ii.zip` and read both XLSX sheets with `openpyxl`.

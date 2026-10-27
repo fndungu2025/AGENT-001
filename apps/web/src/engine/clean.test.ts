@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion, @typescript-eslint/restrict-template-expressions -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 import { describe, expect, it } from "vitest";
 import { cleanTable } from "./clean";
 import type { CleanOptions } from "./clean";

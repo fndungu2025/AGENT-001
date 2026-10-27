@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Cleaning rules R1-R8 (PRD A.1, A.2) with a penny-exact reconciliation.
 // Money is handled as integer pence internally and only converted to currency units at the edge.
 import type { AnalysisOptions, ColumnMapping, QualityReport, RawTable, RuleLog } from "./types";

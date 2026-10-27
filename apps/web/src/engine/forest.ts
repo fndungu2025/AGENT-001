@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- indexed access on typed arrays/fixed tables is bounds-checked by construction; numbers in messages are intentional */
 // Random forest for binary classification: histogram-based trees (32 bins per feature), bootstrap
 // samples, sqrt(P) candidate features per split (continuing to further features only when no valid
 // split was found), min leaf 20, balanced_subsample class weights, seeded.
 // Bootstrap size is capped (maxSamples) so training stays fast on large uploads.
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- typed-array indexing in hot loops */
 import { makeRng } from "./rng";
 
 export interface Binned {

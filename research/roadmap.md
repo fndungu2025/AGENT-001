@@ -404,3 +404,4 @@ Likelihood and impact use H/M/L.
 | 2026-10-21 | Schema v1 + auth scaffolding | db-engineer, identity-access | ✅ | 74 SQL assertions on Postgres 16; 28 auth tests; applied to Supabase dev; security advisor clean |
 | 2026-10-21 | Agent team infrastructure | meta, architect | ✅ | 20 agents extracted with no drift; guard self-tests 94/94; 4 guard defects fixed |
 | 2026-10-21 | UCI data profile | research-analyst | ⏳ blocked | network policy denies archive.ics.uci.edu; script tested on synthetic data only |
+| 2026-10-27 | Browser analytics app (user-requested same-day scope; ADR-0012) | data-engineer, ml-scientist, frontend-engineer | ✅ | engine 59 tests, UI 29 tests; real-browser run of sample, CSV and XLSX; live at the Netlify URL |
