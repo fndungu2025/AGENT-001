@@ -6,7 +6,13 @@ export interface StepDef {
 }
 
 /** Stage list driven by Progress.stage. Status is text ("Done", "In progress"), not just colour. */
-export function Stepper({ steps, current }: { steps: StepDef[]; current: Progress["stage"] | null }) {
+export function Stepper({
+  steps,
+  current,
+}: {
+  steps: StepDef[];
+  current: Progress["stage"] | null;
+}) {
   const idx = current === null ? -1 : steps.findIndex((s) => s.stage === current);
   const allDone = current === "done";
   return (

@@ -33,10 +33,17 @@ export function fmtDate(iso: string): string {
   }).format(d);
 }
 
+/** Engine fields named *Pct hold percentage points (0 to 100), not fractions. */
+export function fmtPoints(x: number, digits = 0): string {
+  return Number.isFinite(x) ? `${x.toFixed(digits)}%` : "–";
+}
+
 /** GBP when the data looks UK-based, otherwise plain numbers. */
 export function detectCurrency(q: QualityReport): string | null {
-  const uk = q.profile.topCountries.find((c) => /united kingdom|^uk$|^gb$|great britain/i.test(c.country));
-  return uk && uk.rowsPct >= 0.5 ? "GBP" : null;
+  const uk = q.profile.topCountries.find((c) =>
+    /united kingdom|^uk$|^gb$|great britain/i.test(c.country),
+  );
+  return uk && uk.rowsPct >= 50 ? "GBP" : null;
 }
 
 export interface MoneyFormatter {
@@ -61,7 +68,8 @@ export function makeMoney(currency: string | null): MoneyFormatter {
     return {
       currency,
       full: (n) => (Number.isFinite(n) ? full.format(n) : "–"),
-      short: (n) => (Number.isFinite(n) ? `${n < 0 ? "-" : ""}${symbol}${compact.format(Math.abs(n))}` : "–"),
+      short: (n) =>
+        Number.isFinite(n) ? `${n < 0 ? "-" : ""}${symbol}${compact.format(Math.abs(n))}` : "–",
     };
   }
   return {

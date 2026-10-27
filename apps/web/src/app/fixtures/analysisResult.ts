@@ -36,16 +36,97 @@ interface Profile {
   cluster: number;
 }
 const PROFILES: Profile[] = [
-  { seg: "champions", count: 6, rec: [2, 25], freq: [12, 30], aov: [220, 520], p: [0.72, 0.93], rfm: [5, 5, 5], cluster: 0 },
-  { seg: "loyal", count: 9, rec: [10, 60], freq: [6, 14], aov: [120, 300], p: [0.55, 0.82], rfm: [4, 4, 4], cluster: 0 },
-  { seg: "new_promising", count: 8, rec: [3, 40], freq: [1, 3], aov: [60, 180], p: [0.3, 0.6], rfm: [5, 1, 2], cluster: 2 },
-  { seg: "high_value_infrequent", count: 6, rec: [30, 120], freq: [2, 4], aov: [450, 900], p: [0.25, 0.55], rfm: [3, 2, 5], cluster: 1 },
-  { seg: "needs_attention", count: 9, rec: [60, 140], freq: [3, 7], aov: [80, 200], p: [0.2, 0.45], rfm: [3, 3, 3], cluster: 2 },
-  { seg: "at_risk", count: 9, rec: [120, 260], freq: [4, 12], aov: [100, 260], p: [0.08, 0.32], rfm: [2, 4, 4], cluster: 3 },
-  { seg: "cant_lose", count: 5, rec: [150, 320], freq: [10, 25], aov: [250, 600], p: [0.06, 0.28], rfm: [1, 5, 5], cluster: 1 },
-  { seg: "inactive", count: 10, rec: [250, 520], freq: [1, 3], aov: [30, 90], p: [0.01, 0.12], rfm: [1, 1, 1], cluster: 3 },
+  {
+    seg: "champions",
+    count: 6,
+    rec: [2, 25],
+    freq: [12, 30],
+    aov: [220, 520],
+    p: [0.72, 0.93],
+    rfm: [5, 5, 5],
+    cluster: 0,
+  },
+  {
+    seg: "loyal",
+    count: 9,
+    rec: [10, 60],
+    freq: [6, 14],
+    aov: [120, 300],
+    p: [0.55, 0.82],
+    rfm: [4, 4, 4],
+    cluster: 0,
+  },
+  {
+    seg: "new_promising",
+    count: 8,
+    rec: [3, 40],
+    freq: [1, 3],
+    aov: [60, 180],
+    p: [0.3, 0.6],
+    rfm: [5, 1, 2],
+    cluster: 2,
+  },
+  {
+    seg: "high_value_infrequent",
+    count: 6,
+    rec: [30, 120],
+    freq: [2, 4],
+    aov: [450, 900],
+    p: [0.25, 0.55],
+    rfm: [3, 2, 5],
+    cluster: 1,
+  },
+  {
+    seg: "needs_attention",
+    count: 9,
+    rec: [60, 140],
+    freq: [3, 7],
+    aov: [80, 200],
+    p: [0.2, 0.45],
+    rfm: [3, 3, 3],
+    cluster: 2,
+  },
+  {
+    seg: "at_risk",
+    count: 9,
+    rec: [120, 260],
+    freq: [4, 12],
+    aov: [100, 260],
+    p: [0.08, 0.32],
+    rfm: [2, 4, 4],
+    cluster: 3,
+  },
+  {
+    seg: "cant_lose",
+    count: 5,
+    rec: [150, 320],
+    freq: [10, 25],
+    aov: [250, 600],
+    p: [0.06, 0.28],
+    rfm: [1, 5, 5],
+    cluster: 1,
+  },
+  {
+    seg: "inactive",
+    count: 10,
+    rec: [250, 520],
+    freq: [1, 3],
+    aov: [30, 90],
+    p: [0.01, 0.12],
+    rfm: [1, 1, 1],
+    cluster: 3,
+  },
 ];
-const COUNTRIES = ["United Kingdom", "United Kingdom", "United Kingdom", "United Kingdom", "Germany", "France", "EIRE", "Netherlands"];
+const COUNTRIES = [
+  "United Kingdom",
+  "United Kingdom",
+  "United Kingdom",
+  "United Kingdom",
+  "Germany",
+  "France",
+  "EIRE",
+  "Netherlands",
+];
 
 function band(p: number): RiskBand {
   return p >= 0.6 ? "high_chance" : p >= 0.3 ? "medium" : "low_chance";
@@ -65,7 +146,9 @@ function makeCustomers(): CustomerRow[] {
       const monetary = r2(avgOrderValue * frequency);
       const pRepeat = Math.round(between(...pr.p) * 1000) / 1000;
       const last = new Date(scoring - recencyDays * 86400000).toISOString().slice(0, 10);
-      const first = new Date(scoring - (recencyDays + frequency * 30 + 20) * 86400000).toISOString().slice(0, 10);
+      const first = new Date(scoring - (recencyDays + frequency * 30 + 20) * 86400000)
+        .toISOString()
+        .slice(0, 10);
       const drivers: Driver[] = [
         {
           feature: "recency_days",
@@ -78,9 +161,16 @@ function makeCustomers(): CustomerRow[] {
         {
           feature: "frequency",
           direction: frequency >= 5 ? "up" : "down",
-          text: frequency >= 5 ? `Has placed ${String(frequency)} orders, so a regular buyer.` : `Only ${String(frequency)} orders so far.`,
+          text:
+            frequency >= 5
+              ? `Has placed ${String(frequency)} orders, so a regular buyer.`
+              : `Only ${String(frequency)} orders so far.`,
         },
-        { feature: "avg_order_value", direction: avgOrderValue > 200 ? "up" : "down", text: `Average order of about £${String(Math.round(avgOrderValue))}.` },
+        {
+          feature: "avg_order_value",
+          direction: avgOrderValue > 200 ? "up" : "down",
+          text: `Average order of about £${String(Math.round(avgOrderValue))}.`,
+        },
       ];
       out.push({
         id: String(n++),
@@ -92,7 +182,12 @@ function makeCustomers(): CustomerRow[] {
         monetary,
         avgOrderValue,
         isWholesale: avgOrderValue > 480 || (pr.seg === "champions" && i === 0),
-        rfm: { r: pr.rfm[0], f: pr.rfm[1], m: pr.rfm[2], score: `${String(pr.rfm[0])}${String(pr.rfm[1])}${String(pr.rfm[2])}` },
+        rfm: {
+          r: pr.rfm[0],
+          f: pr.rfm[1],
+          m: pr.rfm[2],
+          score: `${String(pr.rfm[0])}${String(pr.rfm[1])}${String(pr.rfm[2])}`,
+        },
         segment: pr.seg,
         cluster: pr.cluster,
         pRepeat,
@@ -104,7 +199,7 @@ function makeCustomers(): CustomerRow[] {
   }
   // a hostile id to prove CSV-injection protection end to end
   const first = out[0];
-  if (first) first.id = "=HYPERLINK(\"http://example.com\")";
+  if (first) first.id = '=HYPERLINK("http://example.com")';
   return out;
 }
 
@@ -126,9 +221,9 @@ function segmentSummaries(cs: CustomerRow[]): SegmentSummary[] {
       description: m.blurb,
       action: m.action,
       customers: rows.length,
-      customersPct: rows.length / cs.length,
+      customersPct: r2((rows.length / cs.length) * 100),
       revenue,
-      revenuePct: total > 0 ? revenue / total : 0,
+      revenuePct: total > 0 ? r2((revenue / total) * 100) : 0,
       avgRecencyDays: r2(avg(rows.map((c) => c.recencyDays))),
       avgFrequency: r2(avg(rows.map((c) => c.frequency))),
       avgMonetary: r2(avg(rows.map((c) => c.monetary))),
@@ -137,7 +232,12 @@ function segmentSummaries(cs: CustomerRow[]): SegmentSummary[] {
   });
 }
 
-const CLUSTER_NAMES = ["Frequent high spenders", "Occasional big orders", "Mixed and recent", "Lapsed customers"];
+const CLUSTER_NAMES = [
+  "Frequent high spenders",
+  "Occasional big orders",
+  "Mixed and recent",
+  "Lapsed customers",
+];
 function clusterSummaries(cs: CustomerRow[]): ClusterSummary[] {
   const total = cs.reduce((a, c) => a + c.monetary, 0);
   return CLUSTER_NAMES.map((name, cluster) => {
@@ -150,9 +250,9 @@ function clusterSummaries(cs: CustomerRow[]): ClusterSummary[] {
       cluster,
       name,
       size: rows.length,
-      sizePct: rows.length / cs.length,
+      sizePct: r2((rows.length / cs.length) * 100),
       revenue,
-      revenuePct: total > 0 ? revenue / total : 0,
+      revenuePct: total > 0 ? r2((revenue / total) * 100) : 0,
       medianRecencyDays: median(rows.map((c) => c.recencyDays)),
       medianFrequency: median(rows.map((c) => c.frequency)),
       medianMonetary: r2(median(rows.map((c) => c.monetary))),
@@ -198,11 +298,21 @@ function curves(pairs: Pair[]): ModelResult["curves"] {
     const lo = b / 8;
     const hi = (b + 1) / 8;
     const rows = pairs.filter((x) => x.p >= lo && x.p < hi + (b === 7 ? 1 : 0));
-    return { predicted: avg(rows.map((x) => x.p)), observed: avg(rows.map((x) => x.y)), n: rows.length };
+    return {
+      predicted: avg(rows.map((x) => x.p)),
+      observed: avg(rows.map((x) => x.y)),
+      n: rows.length,
+    };
   }).filter((c) => c.n > 0);
   return { roc, pr, calibration: cal, gain };
 }
-function metrics(pairs: Pair[], threshold: number, rocAuc: number, prAuc: number, capture20: number): ModelMetrics {
+function metrics(
+  pairs: Pair[],
+  threshold: number,
+  rocAuc: number,
+  prAuc: number,
+  capture20: number,
+): ModelMetrics {
   let tp = 0;
   let fp = 0;
   let fn = 0;
@@ -235,7 +345,14 @@ function metrics(pairs: Pair[], threshold: number, rocAuc: number, prAuc: number
   };
 }
 
-function makeModel(name: ModelName, label: string, signal: number, seed: number, prTest: number, capture: number): ModelResult {
+function makeModel(
+  name: ModelName,
+  label: string,
+  signal: number,
+  seed: number,
+  prTest: number,
+  capture: number,
+): ModelResult {
   const rand = rng(seed);
   const gen = (n: number): Pair[] =>
     Array.from({ length: n }, () => {
@@ -260,17 +377,26 @@ function makeModel(name: ModelName, label: string, signal: number, seed: number,
       { feature: "tenure_days", importance: 0.1 },
     ],
     testScores: test,
-    hyperparameters: name === "random_forest" ? { n_estimators: 300, max_depth: 8 } : name === "logreg" ? { C: 1, penalty: "l2" } : {},
+    hyperparameters:
+      name === "random_forest"
+        ? { n_estimators: 300, max_depth: 8 }
+        : name === "logreg"
+          ? { C: 1, penalty: "l2" }
+          : {},
   };
 }
 
-export function makeFixtureResult(opts: { synthetic?: boolean; gainLow?: boolean } = {}): AnalysisResult {
+export function makeFixtureResult(
+  opts: { synthetic?: boolean; gainLow?: boolean } = {},
+): AnalysisResult {
   const customers = makeCustomers();
   const segments = segmentSummaries(customers);
   const clusters = clusterSummaries(customers);
   const crosstab: Record<string, number[]> = {};
   for (const m of SEGMENTS) {
-    crosstab[m.key] = [0, 1, 2, 3].map((k) => customers.filter((c) => c.segment === m.key && c.cluster === k).length);
+    crosstab[m.key] = [0, 1, 2, 3].map(
+      (k) => customers.filter((c) => c.segment === m.key && c.cluster === k).length,
+    );
   }
   const months: AnalysisResult["monthly"] = [];
   const mr = rng(7);
@@ -279,19 +405,34 @@ export function makeFixtureResult(opts: { synthetic?: boolean; gainLow?: boolean
     const m = ((11 + i) % 12) + 1;
     const season = i % 12 >= 8 ? 1.5 : 1;
     const revenue = r2((52000 + mr() * 14000 + i * 900) * season);
-    months.push({ month: `${String(y)}-${String(m).padStart(2, "0")}`, revenue, orders: Math.round(revenue / 410), customers: Math.round(revenue / 640) });
+    months.push({
+      month: `${String(y)}-${String(m).padStart(2, "0")}`,
+      revenue,
+      orders: Math.round(revenue / 410),
+      customers: Math.round(revenue / 640),
+    });
   }
   const models: ModelResult[] = [
     makeModel("baseline_recency", "Simple recency rule", 0.55, 11, 0.5, 0.41),
     makeModel("logreg", "Logistic regression", 0.95, 12, 0.6, 0.55),
-    makeModel("random_forest", "Random forest", 1.15, 13, opts.gainLow ? 0.505 : 0.64, opts.gainLow ? 0.42 : 0.6),
+    makeModel(
+      "random_forest",
+      "Random forest",
+      1.15,
+      13,
+      opts.gainLow ? 0.505 : 0.64,
+      opts.gainLow ? 0.42 : 0.6,
+    ),
   ];
   const net = r2(months.slice(-12).reduce((a, m) => a + m.revenue, 0));
   const atRisk = customers
     .filter((c) => (c.segment === "at_risk" || c.segment === "cant_lose") && c.pRepeat < 0.3)
     .reduce((a, c) => a + c.monetary, 0);
   return {
-    dataset: { name: opts.synthetic === false ? "orders-2011.csv" : "Synthetic sample shop", synthetic: opts.synthetic ?? true },
+    dataset: {
+      name: opts.synthetic === false ? "orders-2011.csv" : "Synthetic sample shop",
+      synthetic: opts.synthetic ?? true,
+    },
     quality: {
       rowsRead: 52340,
       rowsKept: 47912,
@@ -305,7 +446,13 @@ export function makeFixtureResult(opts: { synthetic?: boolean; gainLow?: boolean
         { id: "R7", description: "Impossible dates", rows: 0, revenue: 0 },
         { id: "R8", description: "Wholesale customers flagged", rows: 1480, revenue: 231000 },
       ],
-      reconciliation: { gross: 1204500.4, cancellations: -52300.75, excluded: 128831.1, net: 1023368.55, balances: true },
+      reconciliation: {
+        gross: 1204500.4,
+        cancellations: -52300.75,
+        excluded: 128831.1,
+        net: 1023368.55,
+        balances: true,
+      },
       profile: {
         customers: customers.length,
         invoices: 2210,
@@ -313,19 +460,31 @@ export function makeFixtureResult(opts: { synthetic?: boolean; gainLow?: boolean
         dateMin: "2010-12-01",
         dateMax: "2011-12-09",
         topCountries: [
-          { country: "United Kingdom", rowsPct: 0.86 },
-          { country: "Germany", rowsPct: 0.04 },
-          { country: "France", rowsPct: 0.03 },
+          { country: "United Kingdom", rowsPct: 86 },
+          { country: "Germany", rowsPct: 4 },
+          { country: "France", rowsPct: 3 },
         ],
         revenueShareTop1pct: 0.19,
         revenueShareTop10pct: 0.52,
         wholesaleCustomers: customers.filter((c) => c.isWholesale).length,
-        missingCustomerPct: 0.075,
+        missingCustomerPct: 7.5,
       },
       warnings: [
-        { code: "missing_customer", severity: "warning", message: "7.5% of rows have no customer ID and were left out of customer analysis." },
-        { code: "wholesale_share", severity: "warning", message: "Wholesale customers make up a large share of revenue (about 23%)." },
-        { code: "single_country", severity: "info", message: "86% of rows come from one country (United Kingdom)." },
+        {
+          code: "missing_customer",
+          severity: "warning",
+          message: "7.5% of rows have no customer ID and were left out of customer analysis.",
+        },
+        {
+          code: "wholesale_share",
+          severity: "warning",
+          message: "Wholesale customers make up a large share of revenue (about 23%).",
+        },
+        {
+          code: "single_country",
+          severity: "info",
+          message: "86% of rows come from one country (United Kingdom).",
+        },
       ],
     },
     protocol: {
@@ -343,7 +502,11 @@ export function makeFixtureResult(opts: { synthetic?: boolean; gainLow?: boolean
     kmeans: {
       k: 4,
       silhouette: 0.41,
-      tried: [2, 3, 4, 5, 6].map((k) => ({ k, inertia: Math.round(900 / k ** 0.8), silhouette: [0.38, 0.4, 0.41, 0.36, 0.33][k - 2] ?? 0.3 })),
+      tried: [2, 3, 4, 5, 6].map((k) => ({
+        k,
+        inertia: Math.round(900 / k ** 0.8),
+        silhouette: [0.38, 0.4, 0.41, 0.36, 0.33][k - 2] ?? 0.3,
+      })),
       adjustedRandIndexVsRfm: 0.46,
       crosstab,
     },

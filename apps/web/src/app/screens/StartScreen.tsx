@@ -27,7 +27,9 @@ export function StartScreen({ onLoaded, note }: Props) {
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError("That file is larger than 200 MB, which is too big to analyse in a browser tab. Try a smaller date range.");
+      setError(
+        "That file is larger than 200 MB, which is too big to analyse in a browser tab. Try a smaller date range.",
+      );
       return;
     }
     setBusy("file");

@@ -55,7 +55,9 @@ export function DataTable<T>({
                       }}
                     >
                       {c.header}
-                      <span aria-hidden="true">{active ? (sort.dir === "asc" ? "▲" : "▼") : "↕"}</span>
+                      <span aria-hidden="true">
+                        {active ? (sort.dir === "asc" ? "▲" : "▼") : "↕"}
+                      </span>
                     </button>
                   ) : (
                     c.header

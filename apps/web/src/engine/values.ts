@@ -129,7 +129,10 @@ export function parseDateMs(raw: string, order: DateOrder): number {
 }
 
 /** True when a value is a slash-style date whose first/second part decides the d/m order. */
-export function detectDateOrder(values: readonly string[], sampleSize = 20_000): DateOrderDetection {
+export function detectDateOrder(
+  values: readonly string[],
+  sampleSize = 20_000,
+): DateOrderDetection {
   let firstGt12 = 0; // first part > 12 -> must be the day -> DMY
   let secondGt12 = 0; // second part > 12 -> must be the day -> MDY
   let seen = 0;

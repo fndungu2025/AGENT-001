@@ -1,7 +1,13 @@
 import type { ReactNode, MouseEvent } from "react";
 import { COPY, DOCS_URL } from "../copy";
 
-export function Header({ view, analyticsHref }: { view: "analytics" | "how"; analyticsHref: string }) {
+export function Header({
+  view,
+  analyticsHref,
+}: {
+  view: "analytics" | "how";
+  analyticsHref: string;
+}) {
   return (
     <header className="header">
       <div className="container header-inner">

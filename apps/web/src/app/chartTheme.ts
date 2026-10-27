@@ -12,7 +12,9 @@ export interface ChartColors {
 function read(): ChartColors {
   const cs = getComputedStyle(document.documentElement);
   const v = (name: string, fallback: string) => cs.getPropertyValue(name).trim() || fallback;
-  const dark = typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const dark =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches;
   return {
     text: v("--text", "#1b1f2a"),
     muted: v("--muted", "#4b5563"),
@@ -24,7 +26,10 @@ function read(): ChartColors {
 }
 
 export function prefersReducedMotion(): boolean {
-  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  );
 }
 
 /** Theme colours that follow prefers-color-scheme. */

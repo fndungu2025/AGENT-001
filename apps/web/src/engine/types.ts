@@ -48,7 +48,15 @@ export interface AnalysisOptions {
 }
 
 export interface Progress {
-  stage: "parsing" | "cleaning" | "features" | "segmentation" | "training" | "evaluation" | "scoring" | "done";
+  stage:
+    | "parsing"
+    | "cleaning"
+    | "features"
+    | "segmentation"
+    | "training"
+    | "evaluation"
+    | "scoring"
+    | "done";
   pct: number; // 0..100
   message: string;
 }

@@ -18,7 +18,10 @@ export function csvCell(value: string | number | boolean | null | undefined): st
   return s;
 }
 
-export function toCsv(header: string[], rows: (string | number | boolean | null | undefined)[][]): string {
+export function toCsv(
+  header: string[],
+  rows: (string | number | boolean | null | undefined)[][],
+): string {
   const lines = [header.map(csvCell).join(",")];
   for (const r of rows) lines.push(r.map(csvCell).join(","));
   return `${lines.join("\r\n")}\r\n`;
@@ -57,7 +60,12 @@ export function targetListCsv(customers: CustomerRow[], segments: SegmentSummary
 
 export function qualityCsv(result: AnalysisResult): string {
   const q = result.quality;
-  const rows: (string | number | boolean)[][] = q.rules.map((r) => [r.id, r.description, r.rows, r.revenue]);
+  const rows: (string | number | boolean)[][] = q.rules.map((r) => [
+    r.id,
+    r.description,
+    r.rows,
+    r.revenue,
+  ]);
   rows.push(["", "", "", ""]);
   rows.push(["rows_read", "", q.rowsRead, ""]);
   rows.push(["rows_kept", "", q.rowsKept, ""]);
@@ -66,7 +74,8 @@ export function qualityCsv(result: AnalysisResult): string {
   rows.push(["excluded", "", "", q.reconciliation.excluded]);
   rows.push(["net_revenue", "", "", q.reconciliation.net]);
   rows.push(["reconciliation_balances", "", "", q.reconciliation.balances]);
-  for (const w of q.warnings) rows.push([`warning:${w.code}`, `${w.severity}: ${w.message}`, "", ""]);
+  for (const w of q.warnings)
+    rows.push([`warning:${w.code}`, `${w.severity}: ${w.message}`, "", ""]);
   return toCsv(["rule", "description", "rows", "revenue"], rows);
 }
 

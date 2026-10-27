@@ -10,10 +10,10 @@ import {
   TooltipComponent,
   VisualMapComponent,
 } from "echarts/components";
-import { init, use } from "echarts/core";
+import { init, use as registerEcharts } from "echarts/core";
 import { CanvasRenderer } from "echarts/renderers";
 
-use([
+registerEcharts([
   BarChart,
   LineChart,
   ScatterChart,

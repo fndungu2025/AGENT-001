@@ -9,6 +9,7 @@ import type {
 import { REQUIRED_FIELDS } from "../../engine/types";
 import { COPY, FIELD_LABELS, FIELD_ORDER } from "../copy";
 import { fmtInt } from "../format";
+import { mappingFromSuggestions } from "../lib/mapping";
 import { Alert, Pill } from "../ui/basics";
 import type { PillTone } from "../ui/basics";
 
@@ -20,28 +21,20 @@ interface Props {
   onBack: () => void;
 }
 
-export function mappingFromSuggestions(s: MappingSuggestion[]): ColumnMapping {
-  const m: ColumnMapping = {};
-  for (const x of s) if (x.column !== null && x.confidence > 0) m[x.field] = x.column;
-  return m;
-}
-
 export function MappingScreen({ table, suggestions, defaults, onRun, onBack }: Props) {
   const initial = useMemo(() => mappingFromSuggestions(suggestions), [suggestions]);
   const [mapping, setMapping] = useState<ColumnMapping>(initial);
   const [options, setOptions] = useState<AnalysisOptions>(defaults);
-  const touched = useRef_(new Set<CanonicalField>());
+  const [touched, setTouched] = useState<ReadonlySet<CanonicalField>>(new Set());
 
   const missing = REQUIRED_FIELDS.filter((f) => !mapping[f]);
   const canRun = missing.length === 0;
 
   const setField = (f: CanonicalField, col: string) => {
-    touched.add(f);
+    setTouched((t) => new Set(t).add(f));
     setMapping((m) => {
-      const next = { ...m };
-      if (col === "") delete next[f];
-      else next[f] = col;
-      return next;
+      const next: ColumnMapping = { ...m, [f]: col };
+      return col === "" ? Object.fromEntries(Object.entries(next).filter(([k]) => k !== f)) : next;
     });
   };
 
@@ -61,7 +54,9 @@ export function MappingScreen({ table, suggestions, defaults, onRun, onBack }: P
         <p className="muted" style={{ marginTop: 6 }}>
           {COPY.mapping.lead}
         </p>
-        <p style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+        <p
+          style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}
+        >
           <strong>{table.name}</strong>
           {table.synthetic ? <Pill tone="synthetic">SYNTHETIC</Pill> : null}
           <span className="muted">{COPY.mapping.rows(fmtInt(table.rows.length))}</span>
@@ -111,7 +106,11 @@ export function MappingScreen({ table, suggestions, defaults, onRun, onBack }: P
           </div>
         </section>
 
-        <section className="card accent" aria-labelledby="opt-h" style={{ ["--accent" as string]: "var(--brand-3)" }}>
+        <section
+          className="card accent"
+          aria-labelledby="opt-h"
+          style={{ ["--accent" as string]: "var(--brand-3)" }}
+        >
           <h2 id="opt-h">{COPY.mapping.options}</h2>
           <div className="stack">
             <fieldset style={{ border: 0, padding: 0, margin: 0 }}>

@@ -70,7 +70,11 @@ function value(c: CustomerRow, key: SortKey): string | number {
   }
 }
 
-export function sortCustomers(rows: CustomerRow[], key: SortKey, dir: "asc" | "desc"): CustomerRow[] {
+export function sortCustomers(
+  rows: CustomerRow[],
+  key: SortKey,
+  dir: "asc" | "desc",
+): CustomerRow[] {
   const m = dir === "asc" ? 1 : -1;
   return [...rows].sort((a, b) => {
     const va = value(a, key);

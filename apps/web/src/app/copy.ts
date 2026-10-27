@@ -8,7 +8,12 @@ export const UCI_DOI = "10.24432/C5CG6D";
 export const COPY = {
   appName: "CustomerIQ",
   tagline: "See which customers are likely to buy again, and what to do about it.",
-  nav: { analytics: "Analytics", how: "How it works", docs: "Research & docs", main: "Main navigation" },
+  nav: {
+    analytics: "Analytics",
+    how: "How it works",
+    docs: "Research & docs",
+    main: "Main navigation",
+  },
   skip: "Skip to main content",
   footer: {
     privacy: "Your data stays in your browser. Nothing is uploaded to a server.",
@@ -26,9 +31,18 @@ export const COPY = {
     privacy: "Your file never leaves your browser. All calculations run on this device.",
     stepsTitle: "How it works",
     steps: [
-      { t: "Load your orders", d: "Upload a CSV or Excel export of order lines, or try the built-in sample." },
-      { t: "Check the columns", d: "We guess which column is which. You confirm or fix it in one screen." },
-      { t: "Get answers and actions", d: "Customer groups, who is likely to return, and a list you can export." },
+      {
+        t: "Load your orders",
+        d: "Upload a CSV or Excel export of order lines, or try the built-in sample.",
+      },
+      {
+        t: "Check the columns",
+        d: "We guess which column is which. You confirm or fix it in one screen.",
+      },
+      {
+        t: "Get answers and actions",
+        d: "Customer groups, who is likely to return, and a list you can export.",
+      },
     ],
     sampleTitle: "Try the sample data",
     sampleBadge: "Synthetic sample — not real customers",
@@ -38,7 +52,8 @@ export const COPY = {
     uploadTitle: "Upload your orders (CSV or Excel)",
     uploadButton: "Choose a file",
     dropHint: "Drag and drop a file here, or choose one.",
-    formats: "Accepted: .csv, .tsv, .txt, .xlsx. Up to about 100 MB. One row per order line.",
+    formats:
+      "Accepted: .csv, .tsv, .txt, .xlsx. Very large files may be slow in a browser tab. One row per order line.",
     needs:
       "You need: invoice number, order date, customer ID, quantity and unit price. Product code, description and country are optional but helpful.",
     realData: "Want real data to try?",
@@ -57,7 +72,8 @@ export const COPY = {
     required: "Required",
     optional: "Optional",
     notMapped: "— Not in my file —",
-    confidence: (c: number) => (c >= 0.8 ? "Good match" : c >= 0.5 ? "Possible match" : c > 0 ? "Weak match" : "No match"),
+    confidence: (c: number) =>
+      c >= 0.8 ? "Good match" : c >= 0.5 ? "Possible match" : c > 0 ? "Weak match" : "No match",
     missing: (names: string[]) => `Still needed: ${names.join(", ")}.`,
     allSet: "All required columns are matched.",
     preview: "First 10 rows of your file",
@@ -72,7 +88,8 @@ export const COPY = {
     dateDmy: "Day / month / year",
     dateMdy: "Month / day / year",
     wholesale: "Leave out wholesale customers",
-    wholesaleHelp: "Removes unusually large, bulk-buying customers so retail shoppers are not drowned out.",
+    wholesaleHelp:
+      "Removes unusually large, bulk-buying customers so retail shoppers are not drowned out.",
     run: "Run analysis",
     back: "Choose another file",
     rows: (n: string) => `${n} rows in this file`,
@@ -126,7 +143,10 @@ export const COPY = {
     repeat: ["Repeat-customer rate", "Share of customers who ordered more than once"],
     aov: ["Average order value", "Typical spend per order"],
     expected: ["Expected to buy again", "Customers we expect to order in the look-ahead window"],
-    atRisk: ["Revenue at risk", "Last-12-month revenue from At-risk and Can't-lose customers with under 30% chance of returning"],
+    atRisk: [
+      "Revenue at risk",
+      "Last-12-month revenue from At-risk and Can't-lose customers with under 30% chance of returning",
+    ],
   },
   quality: {
     title: "Can I trust this data?",
@@ -134,7 +154,8 @@ export const COPY = {
     readKept: "Rows read and kept",
     rules: "Cleaning rules (R1–R8)",
     reconciliation: "Does the revenue add up?",
-    balances: "Balances ✓ — gross, cancellations and exclusions reconcile to net revenue to the penny.",
+    balances:
+      "Balances ✓ — gross, cancellations and exclusions reconcile to net revenue to the penny.",
     notBalances: "Does not balance ✗ — treat revenue totals with caution and check the file.",
     profile: "What is in the data",
     warnings: "Things to know",
@@ -146,9 +167,11 @@ export const COPY = {
     title: "Customer groups",
     lead: "Two ways to group customers. RFM uses fixed, easy-to-explain rules. K-means finds natural groups from the numbers.",
     rfmTitle: "Groups by rules (RFM)",
-    rfmHelp: "RFM = Recency (how recently), Frequency (how often), Monetary (how much). Each is scored 1 to 5.",
+    rfmHelp:
+      "RFM = Recency (how recently), Frequency (how often), Monetary (how much). Each is scored 1 to 5.",
     clustersTitle: "Groups found by the data (K-means)",
-    clustersHelp: "The computer looks for customers who behave alike. The names are our plain descriptions.",
+    clustersHelp:
+      "The computer looks for customers who behave alike. The names are our plain descriptions.",
     crosstab: "How the two methods compare",
     elbow: "How many groups fit best?",
     trust: "Which method should I trust?",
@@ -184,12 +207,14 @@ export const COPY = {
       "The model is chosen using a validation period, never the test period.",
     ],
     metricsTitle: "How good is each model?",
-    metricsHelp: "A model only counts if it beats the simple rule “customers who ordered most recently are most likely to return”.",
+    metricsHelp:
+      "A model only counts if it beats the simple rule “customers who ordered most recently are most likely to return”.",
     validation: "Validation period",
     test: "Test period",
     importanceTitle: "What matters most to the model",
     thresholdTitle: "Try a cut-off",
-    thresholdHelp: "Move the slider to choose who counts as “likely to buy again”. Numbers update using the test-period results.",
+    thresholdHelp:
+      "Move the slider to choose who counts as “likely to buy again”. Numbers update using the test-period results.",
     gainLowTitle: "The model adds little over a simple rule",
     gainLowBody:
       "On this data, the machine-learning models were not clearly better than the recency rule. Scores use the simple rule, so treat them as a sorted list, not as precise probabilities. This is an honest result, not a failure of the tool.",
@@ -224,14 +249,25 @@ export const COPY = {
   },
 } as const;
 
-export const FIELD_LABELS: Record<CanonicalField, { label: string; help: string; required: boolean }> = {
+export const FIELD_LABELS: Record<
+  CanonicalField,
+  { label: string; help: string; required: boolean }
+> = {
   invoice_id: { label: "Invoice or order number", help: "Identifies one order", required: true },
   invoice_ts: { label: "Order date", help: "When the order happened", required: true },
-  customer_ref: { label: "Customer ID", help: "Who placed the order. Emails are hashed in your browser.", required: true },
+  customer_ref: {
+    label: "Customer ID",
+    help: "Who placed the order. Emails are hashed in your browser.",
+    required: true,
+  },
   quantity: { label: "Quantity", help: "Units on the line (negative for returns)", required: true },
   unit_price: { label: "Unit price", help: "Price of one unit", required: true },
   stock_code: { label: "Product code", help: "Used to spot postage and fees", required: false },
-  description: { label: "Product description", help: "Used to spot non-product lines", required: false },
+  description: {
+    label: "Product description",
+    help: "Used to spot non-product lines",
+    required: false,
+  },
   country: { label: "Country", help: "Used for the country chart and filter", required: false },
 };
 
