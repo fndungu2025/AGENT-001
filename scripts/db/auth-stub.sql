@@ -78,3 +78,58 @@ grant usage on schema public to anon, authenticated, service_role;
 alter default privileges in schema public grant all on tables    to anon, authenticated, service_role;
 alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+
+-- ---------------------------------------------------------------------------------
+-- Supabase Storage schema (subset). On a real project the storage service owns this
+-- schema (supabase_storage_admin) and creates it before any user migration runs.
+-- Column names/types follow storage.buckets / storage.objects as shipped by Supabase;
+-- storage.foldername() is Supabase's implementation verbatim. RLS is enabled on both
+-- tables and anon/authenticated/service_role hold table privileges, as on Supabase.
+-- ---------------------------------------------------------------------------------
+create schema if not exists storage;
+grant usage on schema storage to anon, authenticated, service_role;
+
+create table if not exists storage.buckets (
+  id                 text primary key,
+  name               text not null,
+  owner              uuid,
+  owner_id           text,
+  created_at         timestamptz default now(),
+  updated_at         timestamptz default now(),
+  public             boolean default false,
+  avif_autodetection boolean default false,
+  file_size_limit    bigint,
+  allowed_mime_types text[]
+);
+create unique index if not exists bname on storage.buckets (name);
+
+create table if not exists storage.objects (
+  id               uuid primary key default gen_random_uuid(),
+  bucket_id        text references storage.buckets (id),
+  name             text,
+  owner            uuid,
+  owner_id         text,
+  created_at       timestamptz default now(),
+  updated_at       timestamptz default now(),
+  last_accessed_at timestamptz default now(),
+  metadata         jsonb,
+  path_tokens      text[] generated always as (string_to_array(name, '/')) stored,
+  version          text,
+  user_metadata    jsonb
+);
+create unique index if not exists bucketid_objname on storage.objects (bucket_id, name);
+
+create or replace function storage.foldername(name text) returns text[]
+language plpgsql as $$
+declare
+  _parts text[];
+begin
+  select string_to_array(name, '/') into _parts;
+  return _parts[1:array_length(_parts, 1) - 1];
+end
+$$;
+grant execute on function storage.foldername(text) to anon, authenticated, service_role;
+
+alter table storage.buckets enable row level security;
+alter table storage.objects enable row level security;
+grant all on storage.buckets, storage.objects to anon, authenticated, service_role;
