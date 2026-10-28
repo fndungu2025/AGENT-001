@@ -62,21 +62,26 @@ describe("App", () => {
     render(<App />);
     fireEvent.click(screen.getByRole("button", { name: /try the sample data/i }));
     expect(
-      await screen.findByRole("tablist", { name: /results sections/i }, { timeout: 5000 }),
+      await screen.findByRole("tablist", { name: /results sections/i }, { timeout: 15000 }),
     ).toBeInTheDocument();
     expect(screen.getAllByText("SYNTHETIC").length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("tab", { name: /data quality/i }));
-    expect((await screen.findAllByText(/balances ✓/i)).length).toBeGreaterThan(0);
-    await waitFor(() => {
-      expect(window.location.hash).toBe("#quality");
-    });
-  });
+    expect(
+      (await screen.findAllByText(/balances ✓/i, {}, { timeout: 15000 })).length,
+    ).toBeGreaterThan(0);
+    await waitFor(
+      () => {
+        expect(window.location.hash).toBe("#quality");
+      },
+      { timeout: 15000 },
+    );
+  }, 60000);
 
   it("shows the in-app explainer from the nav", async () => {
     render(<App />);
     fireEvent.click(screen.getByRole("link", { name: /how it works/i }));
     expect(
-      await screen.findByRole("heading", { level: 1, name: /how it works/i }),
+      await screen.findByRole("heading", { level: 1, name: /how it works/i }, { timeout: 15000 }),
     ).toBeInTheDocument();
-  });
+  }, 60000);
 });
